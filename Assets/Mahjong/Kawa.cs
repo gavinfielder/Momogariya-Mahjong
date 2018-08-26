@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
-
+using UnityEngine;
 
 namespace Mahjong
 {
     //This class represents the pond of one player
-    public class Kawa
+    public class Kawa : MonoBehaviour
     {
         public List<Tile> Tiles { get; private set; }
 

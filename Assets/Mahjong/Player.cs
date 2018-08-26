@@ -1,18 +1,14 @@
 ﻿using System.Collections.Generic;
+using UnityEngine;
 
 namespace Mahjong
 {
-    public class Player
+    public class Player : MonoBehaviour
     {
         private Hand hand;
         private Kawa kawa;
-
-        //Gives a new hand and kawa for a new hand in the round
-        public void Deal(Hand h, Kawa k)
-        {
-            hand = h;
-            kawa = k;
-        }
+        public int PlayerNumber { get; private set; }
+        private string accessKey = "";
 
         //Takes a turn. 
         public TurnResult Turn(TurnArgs args)
@@ -26,6 +22,16 @@ namespace Mahjong
         {
             
             return new List<Tile>();
+        }
+
+        //Gives a hand to the player to set the references and access key
+        public void SetupHand(int playerNumber, ref Hand h, ref Kawa k)
+        {
+            hand = h;
+            kawa = k;
+            PlayerNumber = playerNumber;
+            accessKey = Common.SecurityManager.GetRandomAccessKey();
+            hand.SetOwner(PlayerNumber, accessKey);
         }
     }
 }

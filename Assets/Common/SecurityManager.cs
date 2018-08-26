@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Common
 {
@@ -12,6 +10,17 @@ namespace Common
             //Placeholder
             //After initial commit, this file will be added to ignore.
             return 0;
+        }
+
+        public static string GetRandomAccessKey()
+        {
+            Random rand = new Random();
+            string key = "";
+            for (int i = 0; i < 10; i++)
+            {
+                key += (char) rand.Next(33, 126);
+            }
+            return key;
         }
     }
 }

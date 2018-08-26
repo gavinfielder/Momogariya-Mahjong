@@ -625,7 +625,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Type: 4
-  Visible: 1
+  Visible: 0
   HandArea: {fileID: 828159538}
   DrawArea: {fileID: 154758763}
   TileBase: {fileID: 1829932752086104, guid: 5ada71a6dcc8d10429546f368c05662e, type: 2}

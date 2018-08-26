@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Momogariya Mahjong", "Momogariya Mahjong.csproj", "{DC597AF5-56AE-951B-F4C2-6E491F9A480A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Momogariya Mahjong.Editor", "Momogariya Mahjong.Editor.csproj", "{B144C605-8A8A-1B78-C1EE-45002BF47A43}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DC597AF5-56AE-951B-F4C2-6E491F9A480A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DC597AF5-56AE-951B-F4C2-6E491F9A480A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DC597AF5-56AE-951B-F4C2-6E491F9A480A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DC597AF5-56AE-951B-F4C2-6E491F9A480A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B144C605-8A8A-1B78-C1EE-45002BF47A43}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B144C605-8A8A-1B78-C1EE-45002BF47A43}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B144C605-8A8A-1B78-C1EE-45002BF47A43}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B144C605-8A8A-1B78-C1EE-45002BF47A43}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

@@ -7,7 +7,7 @@ namespace Mahjong
     //Describes the result of a player's turn
     public struct TurnResult
     {
-        public Tile Discard { get; set; }
+        public TileID Discard { get; set; }
     }
 
     //Player turn arguments based on type of draw
@@ -42,8 +42,8 @@ namespace Mahjong
     public class DiscardEventArgs : EventArgs
     {
         public Player Discarder { get; private set; }
-        public Tile Discard { get; private set; }
-        public DiscardEventArgs(Tile discard, Player discarder)
+        public TileID Discard { get; private set; }
+        public DiscardEventArgs(TileID discard, Player discarder)
         {
             Discard = discard;
             Discarder = discarder;
@@ -54,8 +54,8 @@ namespace Mahjong
     public class KanEventArgs : EventArgs
     {
         public Player Declarator { get; private set; }
-        public Tile KanTile { get; private set; }
-        public KanEventArgs(Player declarator, Tile kanTile)
+        public TileID KanTile { get; private set; }
+        public KanEventArgs(Player declarator, TileID kanTile)
         {
             Declarator = declarator;
             KanTile = kanTile;

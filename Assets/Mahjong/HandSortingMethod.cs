@@ -5,21 +5,21 @@ namespace Mahjong
 {
     public struct HandSortingMethod
     {
-        public Dictionary<Tile.Suits, int> SuitOrder;
+        public Dictionary<TileID.Suits, int> SuitOrder;
         public HandSortingMethod(int man, int pin, int sou, int sangen, int kaze)
         {
-            SuitOrder = new Dictionary<Tile.Suits, int>();
-            SuitOrder.Add(Tile.Suits.Man, man);
-            SuitOrder.Add(Tile.Suits.Pin, pin);
-            SuitOrder.Add(Tile.Suits.Sou, sou);
-            SuitOrder.Add(Tile.Suits.Sangen, sangen);
-            SuitOrder.Add(Tile.Suits.Kaze, kaze);
+            SuitOrder = new Dictionary<TileID.Suits, int>();
+            SuitOrder.Add(TileID.Suits.Man, man);
+            SuitOrder.Add(TileID.Suits.Pin, pin);
+            SuitOrder.Add(TileID.Suits.Sou, sou);
+            SuitOrder.Add(TileID.Suits.Sangen, sangen);
+            SuitOrder.Add(TileID.Suits.Kaze, kaze);
         }
 
         public static HandSortingMethod Default = new HandSortingMethod(1, 2, 3, 4, 5);
 
         //Returns whether t1 < t2
-        public bool LessThan(Tile t1, Tile t2)
+        public bool LessThan(TileID t1, TileID t2)
         {
             if (SuitOrder[t1.Suit] < SuitOrder[t2.Suit]) return true;
             else if (SuitOrder[t1.Suit] > SuitOrder[t2.Suit]) return false;
@@ -34,15 +34,15 @@ namespace Mahjong
                 }
             }
         }
-        public bool GreaterThan(Tile t1, Tile t2)
+        public bool GreaterThan(TileID t1, TileID t2)
         {
             return LessThan(t2, t1);
         }
-        public bool LessOrEqual(Tile t1, Tile t2)
+        public bool LessOrEqual(TileID t1, TileID t2)
         {
             return (LessThan(t1, t2) || (t1 == t2));
         }
-        public bool GreaterOrEqual(Tile t1, Tile t2)
+        public bool GreaterOrEqual(TileID t1, TileID t2)
         {
             return (LessThan(t2, t1) || (t1 == t2));
         }

@@ -58,8 +58,8 @@ namespace Mahjong.Tests
             {
                 wall.Draw();
             }
-            Tile next = wall.Draw();
-            Assert.AreEqual(Tile.Invalid, next);
+            TileID next = wall.Draw();
+            Assert.AreEqual(TileID.Invalid, next);
         }
 
         [Test]
@@ -67,22 +67,22 @@ namespace Mahjong.Tests
         {
             WallManager wall = new WallManager();
             //Force a specific wall
-            List<Tile> firstDraws = new List<Tile>();
-            List<Tile> doras = new List<Tile>();
-            firstDraws.Add(new Tile(Tile.Suits.Pin, 2));
-            firstDraws.Add(new Tile(Tile.Suits.Kaze, Tile.SHAA));
-            firstDraws.Add(new Tile(Tile.Suits.Man, 9));
-            firstDraws.Add(new Tile(Tile.Suits.Sangen, Tile.CHUN));
+            List<TileID> firstDraws = new List<TileID>();
+            List<TileID> doras = new List<TileID>();
+            firstDraws.Add(new TileID(TileID.Suits.Pin, 2));
+            firstDraws.Add(new TileID(TileID.Suits.Kaze, TileID.SHAA));
+            firstDraws.Add(new TileID(TileID.Suits.Man, 9));
+            firstDraws.Add(new TileID(TileID.Suits.Sangen, TileID.CHUN));
             wall.Build_ForceOrder(RuleSets.DefaultRules, firstDraws, doras);
             //Make sure the first 4 draws are as defined above
-            Tile t = wall.Draw();
-            Assert.IsTrue(t == new Tile(Tile.Suits.Pin, 2));
+            TileID t = wall.Draw();
+            Assert.IsTrue(t == new TileID(TileID.Suits.Pin, 2));
             t = wall.Draw();
-            Assert.IsTrue(t == new Tile(Tile.Suits.Kaze, Tile.SHAA));
+            Assert.IsTrue(t == new TileID(TileID.Suits.Kaze, TileID.SHAA));
             t = wall.Draw();
-            Assert.IsTrue(t == new Tile(Tile.Suits.Man, 9));
+            Assert.IsTrue(t == new TileID(TileID.Suits.Man, 9));
             t = wall.Draw();
-            Assert.IsTrue(t == new Tile(Tile.Suits.Sangen, Tile.CHUN));
+            Assert.IsTrue(t == new TileID(TileID.Suits.Sangen, TileID.CHUN));
 
         }
 
@@ -95,7 +95,7 @@ namespace Mahjong.Tests
             fout.WriteLine("New Wall:");
             fout.WriteLine("Dora: " + wall.Doras[0].ToString());
             fout.WriteLine("Wall tiles, in order: ");
-            Tile tile;
+            TileID tile;
             int i = 1;
             while (wall.NumberDrawsRemaining > 0)
             {

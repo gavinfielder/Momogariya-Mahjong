@@ -8,7 +8,7 @@ namespace Mahjong
     {
         //Data
         public WallManager Wall = new WallManager();
-        public List<Tile>[] Melds = new List<Tile>[4];
+        public List<TileID>[] Melds = new List<TileID>[4];
         public Kawa[] Ponds = new Kawa[4];
         
 
@@ -19,7 +19,7 @@ namespace Mahjong
             //Allocate array instances
             for (int i = 0; i < 4; i++)
             {
-                Melds[i] = new List<Tile>();
+                Melds[i] = new List<TileID>();
                 Ponds[i] = new Kawa();
             }
         }

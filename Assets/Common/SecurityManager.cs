@@ -7,6 +7,8 @@ namespace Common
     {
         public static int AccessKeyHash(string input)
         {
+            //null input always returns null hash
+            if (input == null || input == "") return 0;
             //Placeholder
             //After initial commit, this file will be added to ignore.
             return 0;

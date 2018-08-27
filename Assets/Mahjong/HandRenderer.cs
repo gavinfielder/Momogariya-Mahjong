@@ -10,7 +10,7 @@ namespace Mahjong
         //TODO: this is defined in multiple places. Move to a single location.
         const float ADJ_TILE_SPACING = 0.41f;
 
-        //private List<Tile> tiles = new List<Tile>();
+        //private List<TileID> tiles = new List<TileID>();
         public enum HandRendererType
         {
             Bottom,
@@ -75,8 +75,8 @@ namespace Mahjong
         {
             float x = DrawArea.transform.position.x;
             float y = DrawArea.transform.position.y;
-            Tile face = hand.GetDraw();
-            if (face == Tile.Hidden) face = Tile.HiddenHand;
+            TileID face = hand.GetDraw();
+            if (face == TileID.Hidden) face = TileID.HiddenHand;
             draw = Instantiate(TileBase);
             draw.GetComponent<TileRenderer>().Face = face;
 
@@ -124,7 +124,7 @@ namespace Mahjong
 
             int i;
             TileRenderer tr;
-            Tile face;
+            TileID face;
             if (Type == HandRendererType.Bottom)
             {
                 for (i = -6; i < 6; i++)
@@ -132,7 +132,7 @@ namespace Mahjong
                     tiles.Add(Instantiate(TileBase));
                     tr = tiles[tiles.Count - 1].GetComponent<TileRenderer>();
                     face = hand.Query(i + 6);
-                    if (face == Tile.Hidden) face = Tile.HiddenHand;
+                    if (face == TileID.Hidden) face = TileID.HiddenHand;
                     tr.Face = face;
 
                     tiles[tiles.Count - 1].transform.SetPositionAndRotation(
@@ -149,7 +149,7 @@ namespace Mahjong
                     tiles.Add(Instantiate(TileBase));
                     tr = tiles[tiles.Count - 1].GetComponent<TileRenderer>();
                     face = hand.Query(i + 6);
-                    if (face == Tile.Hidden) face = Tile.HiddenHand;
+                    if (face == TileID.Hidden) face = TileID.HiddenHand;
                     tr.Face = face;
 
                     tiles[tiles.Count - 1].transform.SetPositionAndRotation(
@@ -166,7 +166,7 @@ namespace Mahjong
                     tiles.Add(Instantiate(TileBase));
                     tr = tiles[tiles.Count - 1].GetComponent<TileRenderer>();
                     face = hand.Query(i + 6);
-                    if (face == Tile.Hidden) face = Tile.HiddenHand;
+                    if (face == TileID.Hidden) face = TileID.HiddenHand;
                     tr.Face = face;
 
                     tiles[tiles.Count - 1].transform.SetPositionAndRotation(
@@ -183,7 +183,7 @@ namespace Mahjong
                     tiles.Add(Instantiate(TileBase));
                     tr = tiles[tiles.Count - 1].GetComponent<TileRenderer>();
                     face = hand.Query(i + 6);
-                    if (face == Tile.Hidden) face = Tile.HiddenHand;
+                    if (face == TileID.Hidden) face = TileID.HiddenHand;
                     tr.Face = face;
 
                     tiles[tiles.Count - 1].transform.SetPositionAndRotation(

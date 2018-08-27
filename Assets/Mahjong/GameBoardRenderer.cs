@@ -74,7 +74,7 @@ namespace Mahjong
                 //tile on top
                 wallTiles.Add(Instantiate(TileBase));
                 tr = wallTiles[wallTiles.Count - 1].GetComponent<TileRenderer>();
-                tr.Face = Tile.Hidden;
+                tr.Face = TileID.Hidden;
                 tr.Layer = 2;
                 wallTiles[wallTiles.Count - 1].transform.SetPositionAndRotation
                     (new Vector3(x + offset, y + TILE_HEIGHT),
@@ -84,7 +84,7 @@ namespace Mahjong
                 //tile on bottom
                 wallTiles.Add(Instantiate(TileBase));
                 tr = wallTiles[wallTiles.Count - 1].GetComponent<TileRenderer>();
-                tr.Face = Tile.Hidden;
+                tr.Face = TileID.Hidden;
                 tr.Layer = 1;
                 wallTiles[wallTiles.Count - 1].transform.SetPositionAndRotation
                     (new Vector3(x + offset, y),
@@ -104,7 +104,7 @@ namespace Mahjong
                 //top layer
                 wallTiles.Add(Instantiate(TileBase));
                 tr = wallTiles[wallTiles.Count - 1].GetComponent<TileRenderer>();
-                tr.Face = Tile.Hidden;
+                tr.Face = TileID.Hidden;
                 tr.Layer = 2;
                 wallTiles[wallTiles.Count - 1].transform.SetPositionAndRotation
                     (new Vector3(x, y - offset + TILE_HEIGHT),
@@ -114,7 +114,7 @@ namespace Mahjong
                 //bottom layer
                 wallTiles.Add(Instantiate(TileBase));
                 tr = wallTiles[wallTiles.Count - 1].GetComponent<TileRenderer>();
-                tr.Face = Tile.Hidden;
+                tr.Face = TileID.Hidden;
                 tr.Layer = 1;
                 wallTiles[wallTiles.Count - 1].transform.SetPositionAndRotation
                     (new Vector3(x, y - offset),
@@ -134,7 +134,7 @@ namespace Mahjong
                 //top layer
                 wallTiles.Add(Instantiate(TileBase));
                 tr = wallTiles[wallTiles.Count - 1].GetComponent<TileRenderer>();
-                tr.Face = Tile.Hidden;
+                tr.Face = TileID.Hidden;
                 tr.Layer = 2;
                 wallTiles[wallTiles.Count - 1].transform.SetPositionAndRotation
                     (new Vector3(x + offset, y + TILE_HEIGHT),
@@ -144,7 +144,7 @@ namespace Mahjong
                 //bottom layer
                 wallTiles.Add(Instantiate(TileBase));
                 tr = wallTiles[wallTiles.Count - 1].GetComponent<TileRenderer>();
-                tr.Face = Tile.Hidden;
+                tr.Face = TileID.Hidden;
                 tr.Layer = 1;
                 wallTiles[wallTiles.Count - 1].transform.SetPositionAndRotation
                     (new Vector3(x + offset, y),
@@ -164,7 +164,7 @@ namespace Mahjong
                 //top layer
                 wallTiles.Add(Instantiate(TileBase));
                 tr = wallTiles[wallTiles.Count - 1].GetComponent<TileRenderer>();
-                tr.Face = Tile.Hidden;
+                tr.Face = TileID.Hidden;
                 tr.Layer = 2;
                 wallTiles[wallTiles.Count - 1].transform.SetPositionAndRotation
                     (new Vector3(x, y + offset + TILE_HEIGHT),
@@ -174,7 +174,7 @@ namespace Mahjong
                 //bottom layer
                 wallTiles.Add(Instantiate(TileBase));
                 tr = wallTiles[wallTiles.Count - 1].GetComponent<TileRenderer>();
-                tr.Face = Tile.Hidden;
+                tr.Face = TileID.Hidden;
                 tr.Layer = 1;
                 wallTiles[wallTiles.Count - 1].transform.SetPositionAndRotation
                     (new Vector3(x, y + offset), 
@@ -240,7 +240,7 @@ namespace Mahjong
         //Reveals all the current dora indicators
         private void RenderDoraIndicators()
         {
-            List<Tile> indicators = Board.Wall.GetDoraIndicators();
+            List<TileID> indicators = Board.Wall.GetDoraIndicators();
             int numberOfDora = indicators.Count;
             //Reveal the ones in the center
             int j = wallTiles.Count - 2;

@@ -7,7 +7,7 @@ namespace Mahjong
 {
     public class WallManager
     {
-        private List<Tile> AllTiles = new List<Tile>();
+        private List<TileID> AllTiles = new List<TileID>();
 
         private int kanReplacementDraws = 0;
         private int numberOfRegularDoras = 0;
@@ -36,8 +36,8 @@ namespace Mahjong
         //Needed for GameBoardRenderer to properly render the wall. 
         public int BrokenAt { get; private set; }
 
-        private List<Tile> doras = new List<Tile>();
-        public List<Tile> Doras
+        private List<TileID> doras = new List<TileID>();
+        public List<TileID> Doras
         {
             get
             {
@@ -55,7 +55,7 @@ namespace Mahjong
         }
 
         //Builds a wall while forcing the first N draws and dora/kandora. For testing only.
-        public void Build_ForceOrder(RuleSet rules, List<Tile> firstDraws, List<Tile> firstDoras)
+        public void Build_ForceOrder(RuleSet rules, List<TileID> firstDraws, List<TileID> firstDoras)
         {
             AddAllTiles(rules);
             for (int i = 0; i < firstDraws.Count; i++)
@@ -81,24 +81,24 @@ namespace Mahjong
         }
 
         //Draws a single tile from the wall
-        public Tile Draw()
+        public TileID Draw()
         {
-            if (NumberDrawsRemaining == 0) return Tile.Invalid;
-            Tile tile = AllTiles[0];
+            if (NumberDrawsRemaining == 0) return TileID.Invalid;
+            TileID tile = AllTiles[0];
             AllTiles.RemoveAt(0);
             EventManager.FlagEvent("Normal Draw");
             return tile;
         }
 
         //Draws a kan replacement tile from the dead wall
-        public Tile DrawKanReplacement()
+        public TileID DrawKanReplacement()
         {
             //kanReplacementDraws++;
-            return Tile.Invalid;
+            return TileID.Invalid;
         }
 
         //Flips a new dora. 
-        public Tile NewDora()
+        public TileID NewDora()
         {
             AllTiles[AllTiles.Count - numberOfRegularDoras - 1].Revealed = true;
             doras.Add(AllTiles[AllTiles.Count - numberOfRegularDoras - 1].GetDoraFromIndicator());
@@ -108,9 +108,9 @@ namespace Mahjong
         }
 
         //Returns all the revealed dora indicators. Used by GameBoardRenderer
-        public List<Tile> GetDoraIndicators()
+        public List<TileID> GetDoraIndicators()
         {
-            List<Tile> list = new List<Tile>();
+            List<TileID> list = new List<TileID>();
             for (int i = 0; i < doras.Count; i++)
             {
                 list.Add(AllTiles[AllTiles.Count - 1 - i].Copy());
@@ -134,76 +134,76 @@ namespace Mahjong
 
             for (int i = 0; i < 4; i++)
             {
-                AllTiles.Add(new Tile(Tile.Suits.Man, 1));
-                AllTiles.Add(new Tile(Tile.Suits.Man, 2));
-                AllTiles.Add(new Tile(Tile.Suits.Man, 3));
-                AllTiles.Add(new Tile(Tile.Suits.Man, 4));
-                AllTiles.Add(new Tile(Tile.Suits.Man, 6));
-                AllTiles.Add(new Tile(Tile.Suits.Man, 7));
-                AllTiles.Add(new Tile(Tile.Suits.Man, 8));
-                AllTiles.Add(new Tile(Tile.Suits.Man, 9));
+                AllTiles.Add(new TileID(TileID.Suits.Man, 1));
+                AllTiles.Add(new TileID(TileID.Suits.Man, 2));
+                AllTiles.Add(new TileID(TileID.Suits.Man, 3));
+                AllTiles.Add(new TileID(TileID.Suits.Man, 4));
+                AllTiles.Add(new TileID(TileID.Suits.Man, 6));
+                AllTiles.Add(new TileID(TileID.Suits.Man, 7));
+                AllTiles.Add(new TileID(TileID.Suits.Man, 8));
+                AllTiles.Add(new TileID(TileID.Suits.Man, 9));
 
-                AllTiles.Add(new Tile(Tile.Suits.Pin, 1));
-                AllTiles.Add(new Tile(Tile.Suits.Pin, 2));
-                AllTiles.Add(new Tile(Tile.Suits.Pin, 3));
-                AllTiles.Add(new Tile(Tile.Suits.Pin, 4));
-                AllTiles.Add(new Tile(Tile.Suits.Pin, 6));
-                AllTiles.Add(new Tile(Tile.Suits.Pin, 7));
-                AllTiles.Add(new Tile(Tile.Suits.Pin, 8));
-                AllTiles.Add(new Tile(Tile.Suits.Pin, 9));
+                AllTiles.Add(new TileID(TileID.Suits.Pin, 1));
+                AllTiles.Add(new TileID(TileID.Suits.Pin, 2));
+                AllTiles.Add(new TileID(TileID.Suits.Pin, 3));
+                AllTiles.Add(new TileID(TileID.Suits.Pin, 4));
+                AllTiles.Add(new TileID(TileID.Suits.Pin, 6));
+                AllTiles.Add(new TileID(TileID.Suits.Pin, 7));
+                AllTiles.Add(new TileID(TileID.Suits.Pin, 8));
+                AllTiles.Add(new TileID(TileID.Suits.Pin, 9));
 
-                AllTiles.Add(new Tile(Tile.Suits.Sou, 1));
-                AllTiles.Add(new Tile(Tile.Suits.Sou, 2));
-                AllTiles.Add(new Tile(Tile.Suits.Sou, 3));
-                AllTiles.Add(new Tile(Tile.Suits.Sou, 4));
-                AllTiles.Add(new Tile(Tile.Suits.Sou, 6));
-                AllTiles.Add(new Tile(Tile.Suits.Sou, 7));
-                AllTiles.Add(new Tile(Tile.Suits.Sou, 8));
-                AllTiles.Add(new Tile(Tile.Suits.Sou, 9));
+                AllTiles.Add(new TileID(TileID.Suits.Sou, 1));
+                AllTiles.Add(new TileID(TileID.Suits.Sou, 2));
+                AllTiles.Add(new TileID(TileID.Suits.Sou, 3));
+                AllTiles.Add(new TileID(TileID.Suits.Sou, 4));
+                AllTiles.Add(new TileID(TileID.Suits.Sou, 6));
+                AllTiles.Add(new TileID(TileID.Suits.Sou, 7));
+                AllTiles.Add(new TileID(TileID.Suits.Sou, 8));
+                AllTiles.Add(new TileID(TileID.Suits.Sou, 9));
 
-                AllTiles.Add(new Tile(Tile.Suits.Kaze, Tile.TON));
-                AllTiles.Add(new Tile(Tile.Suits.Kaze, Tile.NAN));
-                AllTiles.Add(new Tile(Tile.Suits.Kaze, Tile.SHAA));
-                AllTiles.Add(new Tile(Tile.Suits.Kaze, Tile.PEI));
+                AllTiles.Add(new TileID(TileID.Suits.Kaze, TileID.TON));
+                AllTiles.Add(new TileID(TileID.Suits.Kaze, TileID.NAN));
+                AllTiles.Add(new TileID(TileID.Suits.Kaze, TileID.SHAA));
+                AllTiles.Add(new TileID(TileID.Suits.Kaze, TileID.PEI));
 
-                AllTiles.Add(new Tile(Tile.Suits.Sangen, Tile.CHUN));
-                AllTiles.Add(new Tile(Tile.Suits.Sangen, Tile.HAKU));
-                AllTiles.Add(new Tile(Tile.Suits.Sangen, Tile.HATSU));
+                AllTiles.Add(new TileID(TileID.Suits.Sangen, TileID.CHUN));
+                AllTiles.Add(new TileID(TileID.Suits.Sangen, TileID.HAKU));
+                AllTiles.Add(new TileID(TileID.Suits.Sangen, TileID.HATSU));
             }
             //Add in 5's depending on whether akadora is specified
             if (rules.Akadora == true)
             {
-                AllTiles.Add(new Tile(Tile.Suits.Man, 5));
-                AllTiles.Add(new Tile(Tile.Suits.Man, 5));
-                AllTiles.Add(new Tile(Tile.Suits.Man, 5));
-                AllTiles.Add(new Tile(Tile.Suits.Man, 5, true, true));
+                AllTiles.Add(new TileID(TileID.Suits.Man, 5));
+                AllTiles.Add(new TileID(TileID.Suits.Man, 5));
+                AllTiles.Add(new TileID(TileID.Suits.Man, 5));
+                AllTiles.Add(new TileID(TileID.Suits.Man, 5, true));
 
-                AllTiles.Add(new Tile(Tile.Suits.Pin, 5));
-                AllTiles.Add(new Tile(Tile.Suits.Pin, 5));
-                AllTiles.Add(new Tile(Tile.Suits.Pin, 5));
-                AllTiles.Add(new Tile(Tile.Suits.Pin, 5, true, true));
+                AllTiles.Add(new TileID(TileID.Suits.Pin, 5));
+                AllTiles.Add(new TileID(TileID.Suits.Pin, 5));
+                AllTiles.Add(new TileID(TileID.Suits.Pin, 5));
+                AllTiles.Add(new TileID(TileID.Suits.Pin, 5, true));
 
-                AllTiles.Add(new Tile(Tile.Suits.Sou, 5));
-                AllTiles.Add(new Tile(Tile.Suits.Sou, 5));
-                AllTiles.Add(new Tile(Tile.Suits.Sou, 5));
-                AllTiles.Add(new Tile(Tile.Suits.Sou, 5, true, true));
+                AllTiles.Add(new TileID(TileID.Suits.Sou, 5));
+                AllTiles.Add(new TileID(TileID.Suits.Sou, 5));
+                AllTiles.Add(new TileID(TileID.Suits.Sou, 5));
+                AllTiles.Add(new TileID(TileID.Suits.Sou, 5, true));
             }
             else
             {
-                AllTiles.Add(new Tile(Tile.Suits.Man, 5));
-                AllTiles.Add(new Tile(Tile.Suits.Man, 5));
-                AllTiles.Add(new Tile(Tile.Suits.Man, 5));
-                AllTiles.Add(new Tile(Tile.Suits.Man, 5));
+                AllTiles.Add(new TileID(TileID.Suits.Man, 5));
+                AllTiles.Add(new TileID(TileID.Suits.Man, 5));
+                AllTiles.Add(new TileID(TileID.Suits.Man, 5));
+                AllTiles.Add(new TileID(TileID.Suits.Man, 5));
 
-                AllTiles.Add(new Tile(Tile.Suits.Pin, 5));
-                AllTiles.Add(new Tile(Tile.Suits.Pin, 5));
-                AllTiles.Add(new Tile(Tile.Suits.Pin, 5));
-                AllTiles.Add(new Tile(Tile.Suits.Pin, 5));
+                AllTiles.Add(new TileID(TileID.Suits.Pin, 5));
+                AllTiles.Add(new TileID(TileID.Suits.Pin, 5));
+                AllTiles.Add(new TileID(TileID.Suits.Pin, 5));
+                AllTiles.Add(new TileID(TileID.Suits.Pin, 5));
 
-                AllTiles.Add(new Tile(Tile.Suits.Sou, 5));
-                AllTiles.Add(new Tile(Tile.Suits.Sou, 5));
-                AllTiles.Add(new Tile(Tile.Suits.Sou, 5));
-                AllTiles.Add(new Tile(Tile.Suits.Sou, 5));
+                AllTiles.Add(new TileID(TileID.Suits.Sou, 5));
+                AllTiles.Add(new TileID(TileID.Suits.Sou, 5));
+                AllTiles.Add(new TileID(TileID.Suits.Sou, 5));
+                AllTiles.Add(new TileID(TileID.Suits.Sou, 5));
 
             }
         }
@@ -211,13 +211,13 @@ namespace Mahjong
         //Shuffles the tile at the specified index into a random location over a range
         private void ShuffleTile(int index, int low, int high)
         {
-            Tile shuffling = AllTiles[index];
+            TileID shuffling = AllTiles[index];
             //Use invalid placeholder to not mess up the range
-            AllTiles[index] = Tile.Invalid;
+            AllTiles[index] = TileID.Invalid;
             Random rnd = new Random();
             int to = rnd.Next(low, high);
             AllTiles.Insert(to, shuffling);
-            AllTiles.Remove(Tile.Invalid);
+            AllTiles.Remove(TileID.Invalid);
         }
 
         //Shuffles all the tiles over the specified range
@@ -238,13 +238,13 @@ namespace Mahjong
         private void Swap2(int i, int j)
         {
             if (i == j) return;
-            Tile temp = AllTiles[i];
+            TileID temp = AllTiles[i];
             AllTiles[i] = AllTiles[j];
             AllTiles[j] = temp;
         }
 
         //Forces a tile at the specified index, shuffling into the given range until achieved
-        private void ForceTileAt(Tile tile, int index, int low, int high)
+        private void ForceTileAt(TileID tile, int index, int low, int high)
         {
             while (AllTiles[index] != tile)
             {

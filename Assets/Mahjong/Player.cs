@@ -18,10 +18,10 @@ namespace Mahjong
 
 
         //Returns a list of all revealed tiles of the hand
-        public List<Tile> GetRevealed()
+        public List<TileID> GetRevealed()
         {
             
-            return new List<Tile>();
+            return new List<TileID>();
         }
 
         //Gives a hand to the player to set the references and access key

@@ -140,7 +140,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 94146717f7bf8f84389a5ae82e4f6aae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Type: 0
+  Orientation: 1
   Visible: 1
   HandArea: {fileID: 1620910875}
   DrawArea: {fileID: 566486422}
@@ -418,7 +418,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fcdb13e6829f02847828c9d8faf7d9e1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Players:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   board: {fileID: 963147395}
+  TileBase: {fileID: 1829932752086104, guid: 5ada71a6dcc8d10429546f368c05662e, type: 2}
 --- !u!4 &271777929
 Transform:
   m_ObjectHideFlags: 0
@@ -624,8 +630,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 94146717f7bf8f84389a5ae82e4f6aae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Type: 4
-  Visible: 0
+  Orientation: 4
+  Visible: 1
   HandArea: {fileID: 828159538}
   DrawArea: {fileID: 154758763}
   TileBase: {fileID: 1829932752086104, guid: 5ada71a6dcc8d10429546f368c05662e, type: 2}
@@ -902,7 +908,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 94146717f7bf8f84389a5ae82e4f6aae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Type: 3
+  Orientation: 3
   Visible: 1
   HandArea: {fileID: 1633704123}
   DrawArea: {fileID: 84196468}
@@ -1180,6 +1186,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9a126b4c02b52204c8bddd92db78202e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Wall: {fileID: 1400031055}
+  Ponds:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
 --- !u!4 &963147396
 Transform:
   m_ObjectHideFlags: 0
@@ -1393,7 +1405,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 94146717f7bf8f84389a5ae82e4f6aae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Type: 2
+  Orientation: 2
   Visible: 1
   HandArea: {fileID: 941735659}
   DrawArea: {fileID: 198699832}
@@ -1422,6 +1434,46 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e3f920b1285e0594d89b3beb637f19bf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!1 &1400031053
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 5
+  m_Component:
+  - component: {fileID: 1400031054}
+  - component: {fileID: 1400031055}
+  m_Layer: 0
+  m_Name: Wall
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1400031054
+Transform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1400031053}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -7.2380247, y: 0.8985443, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 7
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1400031055
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1400031053}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e78573ead25cc3c429c0dae99f540d08, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &1474480035

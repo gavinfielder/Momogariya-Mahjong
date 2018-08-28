@@ -9,7 +9,7 @@ namespace Mahjong.Tests
         [Test]
         public void Output_Random_access_key()
         {
-            Debug.Log("Test output: Random access key: " + Common.SecurityManager.GetRandomAccessKey());
+            Debug.Log("Test output: Random access key: " + Security.GetRandomAccessKey());
         }
     }
 }

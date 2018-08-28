@@ -4,8 +4,9 @@ namespace Mahjong
 {
     public enum TileVisibility : byte
     {
-        FaceDown,
+        //Note: the first item in this list should match the state of the TileBase prefab.
         FaceUp,
+        FaceDown,
         InHand
     }
 
@@ -17,15 +18,22 @@ namespace Mahjong
         private int _accessKey = 0;
         private TileVisibility visibility;
         public bool StolenDiscard { get; set; }
+        private bool initialized = false;
 
         //Initialization
         private void Start()
         {
+            Initialize();
+        }
+        private void Initialize()
+        {
+            if (initialized) return;
             tileRenderer = gameObject.GetComponent<TileRenderer>();
+            initialized = true;
         }
 
         //Sets the tile. Can only be set once. 
-        public void Set(TileID.Suits suit, byte number, bool dora = false, bool aka = false)
+        public void Set(TileID.Suits suit, byte number, bool aka = false)
         {
             if (set) return;
             id = new TileID(suit, number, aka);
@@ -51,14 +59,19 @@ namespace Mahjong
         public void SetVisibility(TileVisibility value, int accessKey = 0)
         {
             //If the value is the same, don't bother
-            if (visibility == value) return; 
+            if (visibility == value) return;
             //Check if locked for ownership permissions and if so, check access key
-            if (_accessKey != 0 && accessKey != _accessKey) return;
+            if (_accessKey != 0 && accessKey != _accessKey)
+            {
+                Debug.Log("Wrong acess key: Tile.SetVisiblity(value, accessKey)");
+                return;
+            }
             //Set visibility
             visibility = value;
             //If it's face up, there's no point in restricting read permissions anymore.
             if (visibility == TileVisibility.FaceUp) ReleaseOwnership(_accessKey);
             //Pass visibility setting to renderer
+            if (!(initialized)) Initialize();
             tileRenderer.Visibility = visibility;
         }
 

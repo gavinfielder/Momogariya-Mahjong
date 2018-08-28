@@ -6,6 +6,7 @@ namespace Mahjong.Tests
 {
     public class WallTests
     {
+        /*
         [Test]
         public void Build_wall_count_drawable()
         {
@@ -105,5 +106,6 @@ namespace Mahjong.Tests
             }
             fout.Close();
         }
+        */
     }
 }

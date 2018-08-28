@@ -30,8 +30,7 @@ namespace Mahjong
             hand = h;
             kawa = k;
             PlayerNumber = playerNumber;
-            accessKey = Common.SecurityManager.GetRandomAccessKey();
-            hand.SetOwner(PlayerNumber, accessKey);
+            hand.SetOwner(PlayerNumber, 0);
         }
     }
 }

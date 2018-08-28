@@ -7,19 +7,7 @@ namespace Mahjong
 {
     public class HandRenderer : MonoBehaviour
     {
-        //TODO: this is defined in multiple places. Move to a single location.
-        const float ADJ_TILE_SPACING = 0.41f;
-
-        //private List<TileID> tiles = new List<TileID>();
-        public enum HandRendererType
-        {
-            Bottom,
-            Player,
-            Right,
-            Top,
-            Left
-        }
-        public HandRendererType Type;
+        public TileRenderer.TileOrientation Orientation;
         public bool Visible;
         #pragma warning disable CS0649
         public GameObject HandArea;
@@ -39,21 +27,20 @@ namespace Mahjong
                 if (_playerNumber != -1)
                 {
                     EventManager.Unsubscribe("Hand " + _playerNumber + " Discard", OnDiscard);
-                    EventManager.Unsubscribe("Hand " + _playerNumber + " Draw", OnDraw);
+                    EventManager.Unsubscribe("Hand " + _playerNumber + " Draw", OnTileDraw);
                 }
                 _playerNumber = value;
                 EventManager.Subscribe("Hand " + _playerNumber + " Discard", OnDiscard);
-                EventManager.Subscribe("Hand " + _playerNumber + " Draw", OnDraw);
+                EventManager.Subscribe("Hand " + _playerNumber + " Draw", OnTileDraw);
             }
         }
-        private bool initialized = false;
 
-        private List<GameObject> tiles = new List<GameObject>();
-        private GameObject draw;
+        private List<GameObject> tiles;
+        private List<GameObject> drawContainer;
 
         private void Start()
         {
-            Initialize();
+            hand = gameObject.GetComponent<Hand>();
             EventManager.Subscribe("Hands Dealt", OnDeal);
             /*
             //When the wall is built, render the wall
@@ -63,16 +50,18 @@ namespace Mahjong
             */
         }
 
-        private void Initialize()
+        //Sets references to the tile collections in the Hand
+        public void SyncWithHand(ref List<GameObject> handTiles, ref List<GameObject> drawContainerRef)
         {
-            if (initialized) return;
-            hand = gameObject.GetComponent<Hand>();
+            tiles = handTiles;
+            drawContainer = drawContainerRef;
         }
         
 
         //Occurs when a tile is drawn into the hand
         private void OnDraw()
         {
+            /*
             float x = DrawArea.transform.position.x;
             float y = DrawArea.transform.position.y;
             TileID face = hand.GetDraw();
@@ -102,124 +91,78 @@ namespace Mahjong
                     Quaternion.AngleAxis(0, Vector3.forward));
             
             draw.SetActive(true);
+            */
         }
 
-        //Deactivates and clears the tile GameObjects
-        private void ClearHand()
+        //Arranges the hand tiles in correct position. 
+        //Will arrange a draw in the hand, so this is only to be called after deal and discard.
+        private void UpdateHandArrangement()
         {
-            while (tiles.Count > 0)
+            for (int i = -6; i+6 < hand.Count; i++)
             {
-                tiles[0].SetActive(false);
-                tiles.RemoveAt(0);
+                tiles[i+6].GetComponent<TileRenderer>().Position = FormOffset(
+                    HandArea.transform.position.x, HandArea.transform.position.y, i, Orientation);
             }
-
+            
         }
 
-        //Renders the 13 tiles of the hand.
-        private void RenderHand()
+        //Arranges the drawn tile in the correct position.
+        private void UpdateDrawArrangement()
         {
-            ClearHand();
-            float x = HandArea.transform.position.x;
-            float y = HandArea.transform.position.y;
+            drawContainer[0].GetComponent<TileRenderer>().Position
+                = new Vector2(DrawArea.transform.position.x, DrawArea.transform.position.y);
+        }
 
-            int i;
-            TileRenderer tr;
-            TileID face;
-            if (Type == HandRendererType.Bottom)
+        //Helper function for UpdateHandArrangement
+        private Vector2 FormOffset(float x, float y, int numTileOffset, TileRenderer.TileOrientation dir)
+        {
+            Vector2 v = new Vector2(x, y);
+            switch (Orientation)
             {
-                for (i = -6; i < 6; i++)
-                {
-                    tiles.Add(Instantiate(TileBase));
-                    tr = tiles[tiles.Count - 1].GetComponent<TileRenderer>();
-                    face = hand.Query(i + 6);
-                    if (face == TileID.Hidden) face = TileID.HiddenHand;
-                    tr.Face = face;
-
-                    tiles[tiles.Count - 1].transform.SetPositionAndRotation(
-                        new Vector3(x + i * ADJ_TILE_SPACING, y), 
-                        Quaternion.AngleAxis(0f, Vector3.forward));
-                    
-                    tiles[tiles.Count - 1].SetActive(true);
-                }
+                case TileRenderer.TileOrientation.Bottom:
+                    v.x = v.x + numTileOffset * Constants.ADJ_TILE_SPACING;
+                    break;
+                case TileRenderer.TileOrientation.Right:
+                    v.y += numTileOffset * Constants.ADJ_TILE_SPACING;
+                    break;
+                case TileRenderer.TileOrientation.Top:
+                    v.x -= numTileOffset * Constants.ADJ_TILE_SPACING;
+                    break;
+                case TileRenderer.TileOrientation.Left:
+                    v.y -= numTileOffset * Constants.ADJ_TILE_SPACING;
+                    break;
+                case TileRenderer.TileOrientation.Player:
+                    break;
             }
-            else if (Type == HandRendererType.Right)
-            {
-                for (i = -6; i < 6; i++)
-                {
-                    tiles.Add(Instantiate(TileBase));
-                    tr = tiles[tiles.Count - 1].GetComponent<TileRenderer>();
-                    face = hand.Query(i + 6);
-                    if (face == TileID.Hidden) face = TileID.HiddenHand;
-                    tr.Face = face;
-
-                    tiles[tiles.Count - 1].transform.SetPositionAndRotation(
-                        new Vector3(x, y + i * ADJ_TILE_SPACING),
-                        Quaternion.AngleAxis(90f, Vector3.forward));
-
-                    tiles[tiles.Count - 1].SetActive(true);
-                }
-            }
-            else if (Type == HandRendererType.Top)
-            {
-                for (i = -6; i < 6; i++)
-                {
-                    tiles.Add(Instantiate(TileBase));
-                    tr = tiles[tiles.Count - 1].GetComponent<TileRenderer>();
-                    face = hand.Query(i + 6);
-                    if (face == TileID.Hidden) face = TileID.HiddenHand;
-                    tr.Face = face;
-
-                    tiles[tiles.Count - 1].transform.SetPositionAndRotation(
-                        new Vector3(x + i * ADJ_TILE_SPACING, y),
-                        Quaternion.AngleAxis(0f, Vector3.forward));
-
-                    tiles[tiles.Count - 1].SetActive(true);
-                }
-            }
-            else if (Type == HandRendererType.Left)
-            {
-                for (i = -6; i < 6; i++)
-                {
-                    tiles.Add(Instantiate(TileBase));
-                    tr = tiles[tiles.Count - 1].GetComponent<TileRenderer>();
-                    face = hand.Query(i + 6);
-                    if (face == TileID.Hidden) face = TileID.HiddenHand;
-                    tr.Face = face;
-
-                    tiles[tiles.Count - 1].transform.SetPositionAndRotation(
-                        new Vector3(x, y - i * ADJ_TILE_SPACING),
-                        Quaternion.AngleAxis(270f, Vector3.forward));
-
-                    tiles[tiles.Count - 1].SetActive(true);
-                }
-            }
-            else if (Type == HandRendererType.Player)
-            {
-
-            }
-
-
+            return v;
         }
 
 
         //Occurs when a tile is discarded
         private void OnDiscard()
         {
-            //Remove the draw
-            draw.SetActive(false);
-            draw = null;
-            //Check if we need to redraw the hand
-            if (hand.GetDraw() != hand.RecentDiscard)
-            {
-                RenderHand();
-            }
+            UpdateHandArrangement();
         }
 
-
-        //Occurs when the hand is initially dealt
+        //Occurs when the controller finishes dealing the initial 13 tiles
         private void OnDeal()
         {
-            RenderHand();
+            UpdateHandArrangement();
+        }
+
+        //Occurs when a tile is drawn. Arranges the tile in the correct position.
+        private void OnTileDraw()
+        {
+            UpdateDrawArrangement();
+        }
+
+        //Sets up a tile with the right orientation for the hand. Called by Hand after drawing/dealing.
+        public void UpdateOrientation(GameObject tile)
+        {
+            tile.GetComponent<TileRenderer>().Orientation = Orientation;
+            //The following Visible line only works if the Tile's access key is the public read key
+            if (Visible) tile.GetComponent<Tile>().SetVisibility(TileVisibility.FaceUp);
+            else tile.GetComponent<Tile>().SetVisibility(TileVisibility.InHand);
         }
 
 

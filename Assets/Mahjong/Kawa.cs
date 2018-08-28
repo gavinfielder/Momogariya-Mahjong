@@ -19,7 +19,7 @@ namespace Mahjong
         public TileID Steal()
         {
             if (Tiles.Count == 0) return TileID.Invalid;
-            Tiles[Tiles.Count - 1].StolenDiscard = true;
+            //Tiles[Tiles.Count - 1].StolenDiscard = true;
             return Tiles[Tiles.Count - 1];
         }
 

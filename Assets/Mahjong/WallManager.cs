@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine.Events;
-//using UnityEngine;
+using UnityEngine;
 
 namespace Mahjong
 {
-    public class WallManager
+    public class WallManager : MonoBehaviour
     {
-        private List<TileID> AllTiles = new List<TileID>();
+
+        private List<GameObject> wallTiles = new List<GameObject>();
 
         private int kanReplacementDraws = 0;
         private int numberOfRegularDoras = 0;
@@ -28,13 +29,11 @@ namespace Mahjong
         {
             get
             {
-                return AllTiles.Count - 14;
+                return wallTiles.Count - 14;
             }
         }
 
-        //Provides public access to the number of wall which was broken.
-        //Needed for GameBoardRenderer to properly render the wall. 
-        public int BrokenAt { get; private set; }
+        private int accessKey = 0;
 
         private List<TileID> doras = new List<TileID>();
         public List<TileID> Doras
@@ -46,47 +45,103 @@ namespace Mahjong
         }
 
         //Builds the wall for a new game
-        public void Build(RuleSet rules)
+        public void Build(ref List<GameObject> allTiles)
         {
+            //Initialize access key
+            //if (accessKey == 0) accessKey = Security.AccessKeyHash(
+                //Security.GetRandomAccessKey());
+
+            //Reset status conditions
             doras.Clear();
-            AddAllTiles(rules);
-            ShuffleRange(0, AllTiles.Count - 1);
+            kanReplacementDraws = 0;
+            numberOfRegularDoras = 0;
+
+            //Reset tiles and wall
+            Tile tile;
+            wallTiles.Clear();
+            for (int i = 0; i < allTiles.Count; i++)
+            {
+                tile = allTiles[i].GetComponent<Tile>();
+                tile.SetOwner(accessKey);
+                tile.SetVisibility(TileVisibility.FaceDown, accessKey);
+                wallTiles.Add(allTiles[i]);
+            }
+
+            //Shuffle
+            ShuffleRange(0, wallTiles.Count - 1);
+
+            //Arrange wall
+            ArrangeWall();
+
+            //Done
             EventManager.FlagEvent("Wall Built");
         }
 
         //Builds a wall while forcing the first N draws and dora/kandora. For testing only.
-        public void Build_ForceOrder(RuleSet rules, List<TileID> firstDraws, List<TileID> firstDoras)
+        public void Build_ForceOrder(ref List<GameObject> allTiles, List<TileID> firstDraws, List<TileID> firstDoras)
         {
-            AddAllTiles(rules);
+            EventManager.FlagEvent("Debug Function Invoked");
+            Debug.Log("Forcing wall build order...");
+
+            //Initialize access key
+            if (accessKey == 0) accessKey = Security.AccessKeyHash(
+                Security.GetRandomAccessKey());
+
+            //Reset status conditions
+            doras.Clear();
+            kanReplacementDraws = 0;
+            numberOfRegularDoras = 0;
+
+            //Reset tiles and wall
+            Tile tile;
+            wallTiles.Clear();
+            for (int i = 0; i < allTiles.Count; i++)
+            {
+                tile = allTiles[i].GetComponent<Tile>();
+                tile.SetOwner(accessKey);
+                tile.SetVisibility(TileVisibility.FaceDown, accessKey);
+                wallTiles.Add(allTiles[i]);
+            }
+            
+            //Set first draws
             for (int i = 0; i < firstDraws.Count; i++)
             {
-                ForceTileAt(firstDraws[i], i, i + 1, AllTiles.Count - 1);
+                ForceTileAt(firstDraws[i], i, i + 1, wallTiles.Count - 1);
             }
+            //Set first doras
             for (int i = 0; i < firstDoras.Count; i++)
             {
-                ForceTileAt(firstDoras[i], AllTiles.Count - 1 - i, firstDraws.Count, AllTiles.Count - 1 - i - 1);
+                ForceTileAt(firstDoras[i], wallTiles.Count - 1 - i, firstDraws.Count, wallTiles.Count - 1 - i - 1);
             }
-            ShuffleRange(firstDraws.Count, AllTiles.Count - 1 - firstDoras.Count);
+
+            //Shuffle
+            ShuffleRange(firstDraws.Count, wallTiles.Count - 1 - firstDoras.Count);
+            //Done
             EventManager.FlagEvent("Wall Built");
         }
 
         //Breaks the wall and reveals the first dora
         public void Break(int wallNumber)
         {
-            BrokenAt = wallNumber;
-            //Since this class is just all data, we don't actually need logic for 'breaking' the wall
+            //Align draw position (zero-index) accordingly
+            int[] rotateBy = { 6, 40, 74, 108 };
+            RotateWallTiles(rotateBy[wallNumber - 1]);
+            //Render the wall as broken
+            ArrangeBreakWall(wallNumber);
+            //Raise event when done breaking wall
             EventManager.FlagEvent("Wall Broken");
             //Reveal the first dora
             NewDora();
         }
 
         //Draws a single tile from the wall
-        public TileID Draw()
+        public GameObject Draw()
         {
-            if (NumberDrawsRemaining == 0) return TileID.Invalid;
-            TileID tile = AllTiles[0];
-            AllTiles.RemoveAt(0);
-            EventManager.FlagEvent("Normal Draw");
+            if (NumberDrawsRemaining == 0) return null;
+            GameObject tile = wallTiles[0];
+            wallTiles.RemoveAt(0);
+            tile.GetComponent<Tile>().ReleaseOwnership(accessKey);
+            //EventManager.FlagEvent("Normal Draw");
             return tile;
         }
 
@@ -100,22 +155,12 @@ namespace Mahjong
         //Flips a new dora. 
         public TileID NewDora()
         {
-            AllTiles[AllTiles.Count - numberOfRegularDoras - 1].Revealed = true;
-            doras.Add(AllTiles[AllTiles.Count - numberOfRegularDoras - 1].GetDoraFromIndicator());
+            Tile indicator = wallTiles[wallTiles.Count - numberOfRegularDoras * 2 - 2].GetComponent<Tile>();
+            indicator.SetVisibility(TileVisibility.FaceUp, accessKey);
+            doras.Add(indicator.Query().GetDoraFromIndicator());
             numberOfRegularDoras++;
             EventManager.FlagEvent("New Dora");
             return doras[doras.Count - 1];
-        }
-
-        //Returns all the revealed dora indicators. Used by GameBoardRenderer
-        public List<TileID> GetDoraIndicators()
-        {
-            List<TileID> list = new List<TileID>();
-            for (int i = 0; i < doras.Count; i++)
-            {
-                list.Add(AllTiles[AllTiles.Count - 1 - i].Copy());
-            }
-            return list;
         }
 
         //Returns the number of ura dora
@@ -127,104 +172,24 @@ namespace Mahjong
             return r;
         }
 
-        //Adds all the tiles to the main collection
-        private void AddAllTiles(RuleSet rules)
-        {
-            AllTiles.Clear();
-
-            for (int i = 0; i < 4; i++)
-            {
-                AllTiles.Add(new TileID(TileID.Suits.Man, 1));
-                AllTiles.Add(new TileID(TileID.Suits.Man, 2));
-                AllTiles.Add(new TileID(TileID.Suits.Man, 3));
-                AllTiles.Add(new TileID(TileID.Suits.Man, 4));
-                AllTiles.Add(new TileID(TileID.Suits.Man, 6));
-                AllTiles.Add(new TileID(TileID.Suits.Man, 7));
-                AllTiles.Add(new TileID(TileID.Suits.Man, 8));
-                AllTiles.Add(new TileID(TileID.Suits.Man, 9));
-
-                AllTiles.Add(new TileID(TileID.Suits.Pin, 1));
-                AllTiles.Add(new TileID(TileID.Suits.Pin, 2));
-                AllTiles.Add(new TileID(TileID.Suits.Pin, 3));
-                AllTiles.Add(new TileID(TileID.Suits.Pin, 4));
-                AllTiles.Add(new TileID(TileID.Suits.Pin, 6));
-                AllTiles.Add(new TileID(TileID.Suits.Pin, 7));
-                AllTiles.Add(new TileID(TileID.Suits.Pin, 8));
-                AllTiles.Add(new TileID(TileID.Suits.Pin, 9));
-
-                AllTiles.Add(new TileID(TileID.Suits.Sou, 1));
-                AllTiles.Add(new TileID(TileID.Suits.Sou, 2));
-                AllTiles.Add(new TileID(TileID.Suits.Sou, 3));
-                AllTiles.Add(new TileID(TileID.Suits.Sou, 4));
-                AllTiles.Add(new TileID(TileID.Suits.Sou, 6));
-                AllTiles.Add(new TileID(TileID.Suits.Sou, 7));
-                AllTiles.Add(new TileID(TileID.Suits.Sou, 8));
-                AllTiles.Add(new TileID(TileID.Suits.Sou, 9));
-
-                AllTiles.Add(new TileID(TileID.Suits.Kaze, TileID.TON));
-                AllTiles.Add(new TileID(TileID.Suits.Kaze, TileID.NAN));
-                AllTiles.Add(new TileID(TileID.Suits.Kaze, TileID.SHAA));
-                AllTiles.Add(new TileID(TileID.Suits.Kaze, TileID.PEI));
-
-                AllTiles.Add(new TileID(TileID.Suits.Sangen, TileID.CHUN));
-                AllTiles.Add(new TileID(TileID.Suits.Sangen, TileID.HAKU));
-                AllTiles.Add(new TileID(TileID.Suits.Sangen, TileID.HATSU));
-            }
-            //Add in 5's depending on whether akadora is specified
-            if (rules.Akadora == true)
-            {
-                AllTiles.Add(new TileID(TileID.Suits.Man, 5));
-                AllTiles.Add(new TileID(TileID.Suits.Man, 5));
-                AllTiles.Add(new TileID(TileID.Suits.Man, 5));
-                AllTiles.Add(new TileID(TileID.Suits.Man, 5, true));
-
-                AllTiles.Add(new TileID(TileID.Suits.Pin, 5));
-                AllTiles.Add(new TileID(TileID.Suits.Pin, 5));
-                AllTiles.Add(new TileID(TileID.Suits.Pin, 5));
-                AllTiles.Add(new TileID(TileID.Suits.Pin, 5, true));
-
-                AllTiles.Add(new TileID(TileID.Suits.Sou, 5));
-                AllTiles.Add(new TileID(TileID.Suits.Sou, 5));
-                AllTiles.Add(new TileID(TileID.Suits.Sou, 5));
-                AllTiles.Add(new TileID(TileID.Suits.Sou, 5, true));
-            }
-            else
-            {
-                AllTiles.Add(new TileID(TileID.Suits.Man, 5));
-                AllTiles.Add(new TileID(TileID.Suits.Man, 5));
-                AllTiles.Add(new TileID(TileID.Suits.Man, 5));
-                AllTiles.Add(new TileID(TileID.Suits.Man, 5));
-
-                AllTiles.Add(new TileID(TileID.Suits.Pin, 5));
-                AllTiles.Add(new TileID(TileID.Suits.Pin, 5));
-                AllTiles.Add(new TileID(TileID.Suits.Pin, 5));
-                AllTiles.Add(new TileID(TileID.Suits.Pin, 5));
-
-                AllTiles.Add(new TileID(TileID.Suits.Sou, 5));
-                AllTiles.Add(new TileID(TileID.Suits.Sou, 5));
-                AllTiles.Add(new TileID(TileID.Suits.Sou, 5));
-                AllTiles.Add(new TileID(TileID.Suits.Sou, 5));
-
-            }
-        }
-
         //Shuffles the tile at the specified index into a random location over a range
         private void ShuffleTile(int index, int low, int high)
         {
-            TileID shuffling = AllTiles[index];
-            //Use invalid placeholder to not mess up the range
-            AllTiles[index] = TileID.Invalid;
-            Random rnd = new Random();
+            GameObject placeholder = new GameObject();
+            GameObject shuffling = wallTiles[index];
+            //Use placeholder to not mess up the range
+            wallTiles[index] = placeholder;
+            System.Random rnd = new System.Random();
             int to = rnd.Next(low, high);
-            AllTiles.Insert(to, shuffling);
-            AllTiles.Remove(TileID.Invalid);
+            wallTiles.Insert(to, shuffling);
+            wallTiles.Remove(placeholder);
         }
-
+        
         //Shuffles all the tiles over the specified range
         private void ShuffleRange(int low, int high)
         {
             int shuffles = (high - low + 1) * 37;
-            Random rnd = new Random();
+            System.Random rnd = new System.Random();
             int i, j;
             for (int n = 0; n < shuffles; n++)
             {
@@ -238,21 +203,239 @@ namespace Mahjong
         private void Swap2(int i, int j)
         {
             if (i == j) return;
-            TileID temp = AllTiles[i];
-            AllTiles[i] = AllTiles[j];
-            AllTiles[j] = temp;
+            GameObject temp = wallTiles[i];
+            wallTiles[i] = wallTiles[j];
+            wallTiles[j] = temp;
         }
 
         //Forces a tile at the specified index, shuffling into the given range until achieved
         private void ForceTileAt(TileID tile, int index, int low, int high)
         {
-            while (AllTiles[index] != tile)
+            while (wallTiles[index].GetComponent<Tile>().Query(accessKey) != tile)
             {
                 ShuffleTile(index, low, high);
             }
         }
 
+        //Puts all the tiles in their proper spot.
+        private void ArrangeWall()
+        {
+            float offset = 0f;
+            //TODO: refactor this function with an offset helper and the TileRenderer.Position property like I did in HandRenderer
+
+            /*
+            Wall is built in general order of draw. When the wall is broken,
+            the list will be rotated so that the zero index always points
+            to the next normal wall draw. Following this function, the zero
+            index will point to the top tile on the bottom wall's right end.
+
+            If player 1 wall (bottom) is broken, it will need to rotate by 6.
+            If player 4 wall (left) is broken, it will need to rotate by 6+34=40.
+            If player 3 wall (top) is broken, it will need to rotate by 74.
+            If player 2 wall (right) is broken, it will need to rotate by 108.
+
+            This is implemented in the next function, BreakWall()
+            */
+            
+            GameObject area;
+            float x, y;
+            int j = 0; //current tile in collection
+
+            //Build player 1 wall (bottom of screen, right to left)
+            area = GameObject.Find("Wall 1 Area");
+            x = area.transform.position.x;
+            y = area.transform.position.y;
+            for (int i = 8; i >= -8; i--)
+            {
+                offset = i * Constants.ADJ_TILE_SPACING;
+
+                //tile on top
+                wallTiles[j].GetComponent<TileRenderer>().Layer = 2;
+                wallTiles[j].transform.SetPositionAndRotation
+                    (new Vector3(x + offset, y + Constants.TILE_HEIGHT),
+                    Quaternion.identity);
+                wallTiles[j].GetComponent<TileRenderer>().Orientation
+                    = TileRenderer.TileOrientation.Bottom;
+                j++;
+
+                //tile on bottom
+                wallTiles[j].GetComponent<TileRenderer>().Layer = 1;
+                wallTiles[j].transform.SetPositionAndRotation
+                    (new Vector3(x + offset, y),
+                    Quaternion.identity);
+                wallTiles[j].GetComponent<TileRenderer>().Orientation
+                    = TileRenderer.TileOrientation.Bottom;
+                j++;
+            }
+
+            //Build player 4 wall (left of screen, bottom to top
+            area = GameObject.Find("Wall 4 Area");
+            x = area.transform.position.x;
+            y = area.transform.position.y;
+            for (int i = 8; i >= -8; i--)
+            {
+                offset = i * Constants.ADJ_TILE_SPACING;
+
+                //top layer
+                wallTiles[j].GetComponent<TileRenderer>().Layer = 2;
+                wallTiles[j].transform.SetPositionAndRotation
+                    (new Vector3(x, y - offset + Constants.TILE_HEIGHT),
+                    Quaternion.AngleAxis(90, Vector3.forward));
+                wallTiles[j].GetComponent<TileRenderer>().Orientation 
+                    = TileRenderer.TileOrientation.Left;
+                j++;
+
+                //bottom layer
+                wallTiles[j].GetComponent<TileRenderer>().Layer = 1;
+                wallTiles[j].transform.SetPositionAndRotation
+                    (new Vector3(x, y - offset),
+                    Quaternion.AngleAxis(90, Vector3.forward));
+                wallTiles[j].GetComponent<TileRenderer>().Orientation
+                    = TileRenderer.TileOrientation.Left;
+                j++;
+            }
+
+            //Build player 3 wall (top of screen, left to right)
+            area = GameObject.Find("Wall 3 Area");
+            x = area.transform.position.x;
+            y = area.transform.position.y;
+            for (int i = -8; i <= 8; i++)
+            {
+                offset = i * Constants.ADJ_TILE_SPACING;
+
+                //top layer
+                wallTiles[j].GetComponent<TileRenderer>().Layer = 2;
+                wallTiles[j].transform.SetPositionAndRotation
+                    (new Vector3(x + offset, y + Constants.TILE_HEIGHT),
+                    Quaternion.identity);
+                wallTiles[j].GetComponent<TileRenderer>().Orientation
+                    = TileRenderer.TileOrientation.Top;
+                j++;
+
+                //bottom layer
+                wallTiles[j].GetComponent<TileRenderer>().Layer = 1;
+                wallTiles[j].transform.SetPositionAndRotation
+                    (new Vector3(x + offset, y),
+                    Quaternion.identity);
+                wallTiles[j].GetComponent<TileRenderer>().Orientation
+                    = TileRenderer.TileOrientation.Top;
+                j++;
+            }
+
+            //Build player 2 wall (right of screen, top to bottom)
+            area = GameObject.Find("Wall 2 Area");
+            x = area.transform.position.x;
+            y = area.transform.position.y;
+            for (int i = 8; i>= -8; i--)
+            {
+                offset = i * Constants.ADJ_TILE_SPACING;
+
+
+                //top layer
+                wallTiles[j].GetComponent<TileRenderer>().Layer = 2;
+                wallTiles[j].transform.SetPositionAndRotation
+                    (new Vector3(x, y + offset + Constants.TILE_HEIGHT),
+                    Quaternion.AngleAxis(90, Vector3.forward));
+                wallTiles[j].GetComponent<TileRenderer>().Orientation
+                    = TileRenderer.TileOrientation.Right;
+                j++;
+
+                //bottom layer
+                wallTiles[j].GetComponent<TileRenderer>().Layer = 1;
+                wallTiles[j].transform.SetPositionAndRotation
+                    (new Vector3(x, y + offset), 
+                    Quaternion.AngleAxis(90,Vector3.forward));
+                wallTiles[j].GetComponent<TileRenderer>().Orientation
+                    = TileRenderer.TileOrientation.Right;
+                j++;
+            }
+
+            
+        }
+
+        //Arranges the wall broken
+        private void ArrangeBreakWall(int wallNumber)
+        {
+            GameObject area;
+            float x, y;
+
+            //Move last 6 of dead wall to the center
+            int i = wallTiles.Count - 1;
+            area = GameObject.Find("Dora Area");
+            x = area.transform.position.x;
+            y = area.transform.position.y;
+
+
+            for (int j = 1; j >= -1; j--)
+            {
+                //Bottom layer
+                wallTiles[i].transform.SetPositionAndRotation
+                    (new Vector3(x + j * Constants.ADJ_TILE_SPACING, y),
+                    Quaternion.identity);
+                i--;
+
+                //Top layer
+                wallTiles[i].transform.SetPositionAndRotation
+                    (new Vector3(x + j * Constants.ADJ_TILE_SPACING, y + Constants.TILE_HEIGHT),
+                    Quaternion.identity);
+                i--;
+            }
+
+            //Move the other 8 dead wall tiles to the upper right corner
+            area = GameObject.Find("Dead Wall 2 Area");
+            x = area.transform.position.x;
+            y = area.transform.position.y;
+            for (int j = 1; j >= -2; j--)
+            {
+                //Bottom layer
+                wallTiles[i].transform.SetPositionAndRotation
+                    (new Vector3(x + j * Constants.ADJ_TILE_SPACING, y),
+                    Quaternion.identity);
+                i--;
+
+                //Top layer
+                wallTiles[i].transform.SetPositionAndRotation
+                    (new Vector3(x + j * Constants.ADJ_TILE_SPACING, y + Constants.TILE_HEIGHT),
+                    Quaternion.identity);
+                i--;
+            }
+        }
         
-        
+        //Rotates the collection with items in front moving to the back, n times
+        //Helper function used to align the current draw with the front of the list
+        private void RotateWallTiles(int n)
+        {
+            GameObject temp;
+            for (int i = 0; i < n; i++)
+            {
+                temp = wallTiles[0];
+                wallTiles.RemoveAt(0);
+                wallTiles.Add(temp);
+            }
+        }
+
+        //Clears all the rendered tiles of the wall
+        private void ClearWall()
+        {
+            for (int i = 0; i < wallTiles.Count; i++)
+            {
+                wallTiles[i].SetActive(false);
+                wallTiles[i] = null;
+            }
+            wallTiles.Clear();
+        }
+
+        //Occurs when a tile is drawn from the wall
+        private void OnNormalDraw()
+        {
+            wallTiles[0].SetActive(false);
+            wallTiles.RemoveAt(0);
+        }
+
+
+
+
+
+
     }
 }

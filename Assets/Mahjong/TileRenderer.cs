@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Mahjong
 {
-    class TileRenderer : MonoBehaviour
+    public class TileRenderer : MonoBehaviour
     {
         #pragma warning disable CS0649
         public SpriteRenderer BaseSpriteRenderer;
@@ -59,6 +59,19 @@ namespace Mahjong
             }
         }
         
+        public Vector2 Position
+        {
+            get
+            {
+                return new Vector2(gameObject.transform.position.x, gameObject.transform.position.y);
+            }
+            set
+            {
+                gameObject.transform.SetPositionAndRotation(
+                    new Vector3(value.x, value.y), gameObject.transform.rotation);
+            }
+        }
+
         private TileVisibility _visibility = TileVisibility.FaceDown;
         public TileVisibility Visibility
         {
@@ -75,6 +88,7 @@ namespace Mahjong
                         Face = TileID.Hidden;
                         break;
                     case TileVisibility.FaceUp:
+                        if (!(initialized)) Initialize(); //TODO: find a better way to avoid these bugs on creation. 
                         Face = tile.Query();
                         break;
                     case TileVisibility.InHand:
@@ -86,10 +100,18 @@ namespace Mahjong
 
         private Tile tile;
 
+        private bool initialized;
+
         //Initialization
         private void Start()
         {
+            
+        }
+        private void Initialize()
+        {
+            if (initialized) return;
             tile = gameObject.GetComponent<Tile>();
+            initialized = true;
         }
 
         //Gets or sets the tile that this renderer shows

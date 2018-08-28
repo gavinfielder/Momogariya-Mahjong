@@ -117,7 +117,7 @@ namespace Mahjong
         private Vector2 FormOffset(float x, float y, int numTileOffset, TileRenderer.TileOrientation dir)
         {
             Vector2 v = new Vector2(x, y);
-            switch (Orientation)
+            switch (dir)
             {
                 case TileRenderer.TileOrientation.Bottom:
                     v.x = v.x + numTileOffset * Constants.ADJ_TILE_SPACING;

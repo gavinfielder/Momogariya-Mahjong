@@ -211,8 +211,12 @@ namespace Mahjong
                 CreateTileSet(RuleSets.DefaultRules);
                 board.Wall.Build(ref allTiles);
 
-                
-                board.Wall.Break(4);
+                System.Random rand = new System.Random();
+                int r = rand.Next(1, 5);
+                if (r == 5) r = 4;
+                //r = 4;
+
+                board.Wall.Break(r);
                 
                 Hand[] hands = new Hand[4];
                 hands[0] = GameObject.Find("Hand 1").GetComponent<Hand>();

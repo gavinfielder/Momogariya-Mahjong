@@ -48,8 +48,8 @@ namespace Mahjong
         public void Build(ref List<GameObject> allTiles)
         {
             //Initialize access key
-            //if (accessKey == 0) accessKey = Security.AccessKeyHash(
-                //Security.GetRandomAccessKey());
+            if (accessKey == 0) accessKey = Security.AccessKeyHash(
+                Security.GetRandomAccessKey());
 
             //Reset status conditions
             doras.Clear();
@@ -220,9 +220,6 @@ namespace Mahjong
         //Puts all the tiles in their proper spot.
         private void ArrangeWall()
         {
-            float offset = 0f;
-            //TODO: refactor this function with an offset helper and the TileRenderer.Position property like I did in HandRenderer
-
             /*
             Wall is built in general order of draw. When the wall is broken,
             the list will be rotated so that the zero index always points
@@ -238,6 +235,7 @@ namespace Mahjong
             */
             
             GameObject area;
+            TileRenderer tr;
             float x, y;
             int j = 0; //current tile in collection
 
@@ -245,26 +243,20 @@ namespace Mahjong
             area = GameObject.Find("Wall 1 Area");
             x = area.transform.position.x;
             y = area.transform.position.y;
-            for (int i = 8; i >= -8; i--)
+            for (int i = -8; i <= 8; i++)
             {
-                offset = i * Constants.ADJ_TILE_SPACING;
-
                 //tile on top
-                wallTiles[j].GetComponent<TileRenderer>().Layer = 2;
-                wallTiles[j].transform.SetPositionAndRotation
-                    (new Vector3(x + offset, y + Constants.TILE_HEIGHT),
-                    Quaternion.identity);
-                wallTiles[j].GetComponent<TileRenderer>().Orientation
-                    = TileRenderer.TileOrientation.Bottom;
+                tr = wallTiles[j].GetComponent<TileRenderer>();
+                tr.Layer = 2;
+                tr.Position = FormWallOffset(x, y + Constants.TILE_HEIGHT, i, TileRenderer.TileOrientation.Bottom);
+                tr.Orientation = TileRenderer.TileOrientation.Bottom;
                 j++;
 
                 //tile on bottom
-                wallTiles[j].GetComponent<TileRenderer>().Layer = 1;
-                wallTiles[j].transform.SetPositionAndRotation
-                    (new Vector3(x + offset, y),
-                    Quaternion.identity);
-                wallTiles[j].GetComponent<TileRenderer>().Orientation
-                    = TileRenderer.TileOrientation.Bottom;
+                tr = wallTiles[j].GetComponent<TileRenderer>();
+                tr.Layer = 1;
+                tr.Position = FormWallOffset(x, y, i, TileRenderer.TileOrientation.Bottom);
+                tr.Orientation = TileRenderer.TileOrientation.Bottom;
                 j++;
             }
 
@@ -272,26 +264,20 @@ namespace Mahjong
             area = GameObject.Find("Wall 4 Area");
             x = area.transform.position.x;
             y = area.transform.position.y;
-            for (int i = 8; i >= -8; i--)
+            for (int i = -8; i <= 8; i++)
             {
-                offset = i * Constants.ADJ_TILE_SPACING;
-
-                //top layer
-                wallTiles[j].GetComponent<TileRenderer>().Layer = 2;
-                wallTiles[j].transform.SetPositionAndRotation
-                    (new Vector3(x, y - offset + Constants.TILE_HEIGHT),
-                    Quaternion.AngleAxis(90, Vector3.forward));
-                wallTiles[j].GetComponent<TileRenderer>().Orientation 
-                    = TileRenderer.TileOrientation.Left;
+                //tile on top
+                tr = wallTiles[j].GetComponent<TileRenderer>();
+                tr.Layer = 2;
+                tr.Position = FormWallOffset(x, y + Constants.TILE_HEIGHT, i, TileRenderer.TileOrientation.Left);
+                tr.Orientation = TileRenderer.TileOrientation.Left;
                 j++;
 
-                //bottom layer
-                wallTiles[j].GetComponent<TileRenderer>().Layer = 1;
-                wallTiles[j].transform.SetPositionAndRotation
-                    (new Vector3(x, y - offset),
-                    Quaternion.AngleAxis(90, Vector3.forward));
-                wallTiles[j].GetComponent<TileRenderer>().Orientation
-                    = TileRenderer.TileOrientation.Left;
+                //tile on bottom
+                tr = wallTiles[j].GetComponent<TileRenderer>();
+                tr.Layer = 1;
+                tr.Position = FormWallOffset(x, y, i, TileRenderer.TileOrientation.Left);
+                tr.Orientation = TileRenderer.TileOrientation.Left;
                 j++;
             }
 
@@ -301,24 +287,18 @@ namespace Mahjong
             y = area.transform.position.y;
             for (int i = -8; i <= 8; i++)
             {
-                offset = i * Constants.ADJ_TILE_SPACING;
-
-                //top layer
-                wallTiles[j].GetComponent<TileRenderer>().Layer = 2;
-                wallTiles[j].transform.SetPositionAndRotation
-                    (new Vector3(x + offset, y + Constants.TILE_HEIGHT),
-                    Quaternion.identity);
-                wallTiles[j].GetComponent<TileRenderer>().Orientation
-                    = TileRenderer.TileOrientation.Top;
+                //tile on top
+                tr = wallTiles[j].GetComponent<TileRenderer>();
+                tr.Layer = 2;
+                tr.Position = FormWallOffset(x, y + Constants.TILE_HEIGHT, i, TileRenderer.TileOrientation.Top);
+                tr.Orientation = TileRenderer.TileOrientation.Top;
                 j++;
 
-                //bottom layer
-                wallTiles[j].GetComponent<TileRenderer>().Layer = 1;
-                wallTiles[j].transform.SetPositionAndRotation
-                    (new Vector3(x + offset, y),
-                    Quaternion.identity);
-                wallTiles[j].GetComponent<TileRenderer>().Orientation
-                    = TileRenderer.TileOrientation.Top;
+                //tile on bottom
+                tr = wallTiles[j].GetComponent<TileRenderer>();
+                tr.Layer = 1;
+                tr.Position = FormWallOffset(x, y, i, TileRenderer.TileOrientation.Top);
+                tr.Orientation = TileRenderer.TileOrientation.Top;
                 j++;
             }
 
@@ -326,37 +306,55 @@ namespace Mahjong
             area = GameObject.Find("Wall 2 Area");
             x = area.transform.position.x;
             y = area.transform.position.y;
-            for (int i = 8; i>= -8; i--)
+            for (int i = -8; i <= 8; i++)
             {
-                offset = i * Constants.ADJ_TILE_SPACING;
-
-
-                //top layer
-                wallTiles[j].GetComponent<TileRenderer>().Layer = 2;
-                wallTiles[j].transform.SetPositionAndRotation
-                    (new Vector3(x, y + offset + Constants.TILE_HEIGHT),
-                    Quaternion.AngleAxis(90, Vector3.forward));
-                wallTiles[j].GetComponent<TileRenderer>().Orientation
-                    = TileRenderer.TileOrientation.Right;
+                //tile on top
+                tr = wallTiles[j].GetComponent<TileRenderer>();
+                tr.Layer = 2;
+                tr.Position = FormWallOffset(x, y + Constants.TILE_HEIGHT, i, TileRenderer.TileOrientation.Right);
+                tr.Orientation = TileRenderer.TileOrientation.Right;
                 j++;
 
-                //bottom layer
-                wallTiles[j].GetComponent<TileRenderer>().Layer = 1;
-                wallTiles[j].transform.SetPositionAndRotation
-                    (new Vector3(x, y + offset), 
-                    Quaternion.AngleAxis(90,Vector3.forward));
-                wallTiles[j].GetComponent<TileRenderer>().Orientation
-                    = TileRenderer.TileOrientation.Right;
+                //tile on bottom
+                tr = wallTiles[j].GetComponent<TileRenderer>();
+                tr.Layer = 1;
+                tr.Position = FormWallOffset(x, y, i, TileRenderer.TileOrientation.Right);
+                tr.Orientation = TileRenderer.TileOrientation.Right;
                 j++;
             }
 
-            
         }
+
+        //Helper function for ArrangeWall
+        private Vector2 FormWallOffset(float x, float y, int numTileOffset, TileRenderer.TileOrientation dir)
+        {
+            Vector2 v = new Vector2(x, y);
+            switch (dir)
+            {
+                case TileRenderer.TileOrientation.Bottom:
+                    v.x -= numTileOffset * Constants.ADJ_TILE_SPACING;
+                    break;
+                case TileRenderer.TileOrientation.Right:
+                    v.y -= numTileOffset * Constants.ADJ_TILE_SPACING;
+                    break;
+                case TileRenderer.TileOrientation.Top:
+                    v.x += numTileOffset * Constants.ADJ_TILE_SPACING;
+                    break;
+                case TileRenderer.TileOrientation.Left:
+                    v.y += numTileOffset * Constants.ADJ_TILE_SPACING;
+                    break;
+                case TileRenderer.TileOrientation.Player:
+                    break;
+            }
+            return v;
+        }
+
 
         //Arranges the wall broken
         private void ArrangeBreakWall(int wallNumber)
         {
             GameObject area;
+            TileRenderer tr;
             float x, y;
 
             //Move last 6 of dead wall to the center
@@ -364,20 +362,18 @@ namespace Mahjong
             area = GameObject.Find("Dora Area");
             x = area.transform.position.x;
             y = area.transform.position.y;
-
-
             for (int j = 1; j >= -1; j--)
             {
                 //Bottom layer
-                wallTiles[i].transform.SetPositionAndRotation
-                    (new Vector3(x + j * Constants.ADJ_TILE_SPACING, y),
-                    Quaternion.identity);
+                tr = wallTiles[i].GetComponent<TileRenderer>();
+                tr.Position = new Vector2(x + j * Constants.ADJ_TILE_SPACING, y);
+                tr.Orientation = TileRenderer.TileOrientation.Bottom;
                 i--;
 
-                //Top layer
-                wallTiles[i].transform.SetPositionAndRotation
-                    (new Vector3(x + j * Constants.ADJ_TILE_SPACING, y + Constants.TILE_HEIGHT),
-                    Quaternion.identity);
+                //Top Layer
+                tr = wallTiles[i].GetComponent<TileRenderer>();
+                tr.Position = new Vector2(x + j * Constants.ADJ_TILE_SPACING, y + Constants.TILE_HEIGHT);
+                tr.Orientation = TileRenderer.TileOrientation.Bottom;
                 i--;
             }
 
@@ -388,15 +384,15 @@ namespace Mahjong
             for (int j = 1; j >= -2; j--)
             {
                 //Bottom layer
-                wallTiles[i].transform.SetPositionAndRotation
-                    (new Vector3(x + j * Constants.ADJ_TILE_SPACING, y),
-                    Quaternion.identity);
+                tr = wallTiles[i].GetComponent<TileRenderer>();
+                tr.Position = new Vector2(x + j * Constants.ADJ_TILE_SPACING, y);
+                tr.Orientation = TileRenderer.TileOrientation.Bottom;
                 i--;
 
                 //Top layer
-                wallTiles[i].transform.SetPositionAndRotation
-                    (new Vector3(x + j * Constants.ADJ_TILE_SPACING, y + Constants.TILE_HEIGHT),
-                    Quaternion.identity);
+                tr = wallTiles[i].GetComponent<TileRenderer>();
+                tr.Position = new Vector2(x + j * Constants.ADJ_TILE_SPACING, y + Constants.TILE_HEIGHT);
+                tr.Orientation = TileRenderer.TileOrientation.Bottom;
                 i--;
             }
         }

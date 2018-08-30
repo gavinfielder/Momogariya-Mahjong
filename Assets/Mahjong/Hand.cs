@@ -66,12 +66,15 @@ namespace Mahjong
         }
         
         //Removes the first occurring matching tile from the hand and sets it as a recent discard
-        public void RemoveDiscard(TileID tileID)
+        public void RemoveDiscard(TileID tileID, Kawa kawa)
         {
+            Debug.Log("Discarding: " + tileID.ToString());
             int i = hand.IndexOf(tileID);
             Discard = tiles[i];
             tiles.RemoveAt(i);
             hand.RemoveAt(i);
+            Discard.GetComponent<Tile>().ReleaseOwnership(_accessKey);
+            kawa.Add(Discard);
             EventManager.FlagEvent("Hand " + PlayerNumber + " Discard");
         }
 
@@ -104,6 +107,13 @@ namespace Mahjong
             //Reset openly readable references to cut any existing links
             hand = new List<TileID>();
             DrawIDContainer = new List<TileID>();
+        }
+
+        //Checks whether a tile is contained in the hand
+        public bool Contains(GameObject tile, int accessKey = 0)
+        {
+            if (accessKey != _accessKey) return false;
+            return tiles.Contains(tile);
         }
     }
 }

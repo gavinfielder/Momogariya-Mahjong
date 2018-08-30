@@ -20,6 +20,9 @@ namespace Mahjong
         public bool StolenDiscard { get; set; }
         private bool initialized = false;
 
+        //Stores a reference to the last tile that was clicked
+        public static GameObject LastClickedTile;
+
         //Initialization
         private void Start()
         {
@@ -84,6 +87,12 @@ namespace Mahjong
                 return TileID.Hidden;
         }
 
+        //Occurs when the user clicks the tile
+        private void OnMouseUpAsButton()
+        {
+            LastClickedTile = gameObject;
+            EventManager.FlagEvent("Tile Clicked");
+        }
     }
 
 }

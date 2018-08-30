@@ -4,6 +4,15 @@ using UnityEngine;
 
 namespace Mahjong
 {
+    public enum TileOrientation : byte
+    {
+        Player = 0,
+        Bottom = 1,
+        Right = 2,
+        Top = 3,
+        Left = 4
+    }
+
     public class TileRenderer : MonoBehaviour
     {
         #pragma warning disable CS0649
@@ -11,14 +20,6 @@ namespace Mahjong
         public SpriteRenderer FaceSpriteRenderer;
         #pragma warning restore CS0649
 
-        public enum TileOrientation : byte
-        {
-            Player = 0,
-            Bottom = 1,
-            Right = 2,
-            Top = 3,
-            Left = 4
-        }
         private TileOrientation _orientation = TileOrientation.Bottom;
         public TileOrientation Orientation {
             get
@@ -105,7 +106,7 @@ namespace Mahjong
         //Initialization
         private void Start()
         {
-            
+
         }
         private void Initialize()
         {

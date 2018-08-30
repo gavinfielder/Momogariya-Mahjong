@@ -7,7 +7,7 @@ namespace Mahjong
 {
     public class HandRenderer : MonoBehaviour
     {
-        public TileRenderer.TileOrientation Orientation;
+        public TileOrientation Orientation;
         public bool Visible;
         #pragma warning disable CS0649
         public GameObject HandArea;
@@ -42,12 +42,6 @@ namespace Mahjong
         {
             hand = gameObject.GetComponent<Hand>();
             EventManager.Subscribe("Hands Dealt", OnDeal);
-            /*
-            //When the wall is built, render the wall
-            EventManager.Subscribe("Wall Built", RenderWall);
-            EventManager.Subscribe("Wall Broken", BreakWall);
-            EventManager.Subscribe("New Dora", RenderDoraIndicators);
-            */
         }
 
         //Sets references to the tile collections in the Hand
@@ -114,24 +108,24 @@ namespace Mahjong
         }
 
         //Helper function for UpdateHandArrangement
-        private Vector2 FormOffset(float x, float y, int numTileOffset, TileRenderer.TileOrientation dir)
+        private Vector2 FormOffset(float x, float y, int numTileOffset, TileOrientation dir)
         {
             Vector2 v = new Vector2(x, y);
             switch (dir)
             {
-                case TileRenderer.TileOrientation.Bottom:
+                case TileOrientation.Bottom:
                     v.x = v.x + numTileOffset * Constants.ADJ_TILE_SPACING;
                     break;
-                case TileRenderer.TileOrientation.Right:
+                case TileOrientation.Right:
                     v.y += numTileOffset * Constants.ADJ_TILE_SPACING;
                     break;
-                case TileRenderer.TileOrientation.Top:
+                case TileOrientation.Top:
                     v.x -= numTileOffset * Constants.ADJ_TILE_SPACING;
                     break;
-                case TileRenderer.TileOrientation.Left:
+                case TileOrientation.Left:
                     v.y -= numTileOffset * Constants.ADJ_TILE_SPACING;
                     break;
-                case TileRenderer.TileOrientation.Player:
+                case TileOrientation.Player:
                     break;
             }
             return v;

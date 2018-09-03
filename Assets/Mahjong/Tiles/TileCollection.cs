@@ -41,6 +41,7 @@ namespace Mahjong
         {
             if ((accessKey != _accessKey) && _accessKey != 0)
                 return;
+            if (Contains(tile, _accessKey)) return;
             TileID id = tile.Query(_accessKey);
             if (id == TileID.Hidden) return;
             //Insert tile into sorted position
@@ -128,7 +129,7 @@ namespace Mahjong
             return tiles.IndexOf(tile);
         }
 
-        //Returns whether the index of the first matching tile or -1 if not found
+        //Returns the index of the first matching tile or -1 if not found
         public int IndexOf(TileID id, int accessKey = 0)
         {
             if ((accessKey != _accessKey) && _accessKey != 0)
@@ -139,7 +140,19 @@ namespace Mahjong
             if (i < tileIDs.Count) return i;
             else return -1;
         }
-        
+
+        //Returns the number of matching tiles in the collection
+        public int CountOf(TileID id, int accessKey = 0)
+        {
+            if ((accessKey != _accessKey) && _accessKey != 0)
+                return -1;
+            int index = IndexOf(id, _accessKey);
+            if (index == -1) return 0;
+            int count = 1;
+            while (index + count < this.Count && tileIDs[index + count] == id)
+                count++;
+            return count;
+        }        
 
         //***********************************************************************
         //************************** Access Management **************************
@@ -183,6 +196,9 @@ namespace Mahjong
         }
 
     }
+
+
+
 
 
     //Also maintains a list of closed tiles

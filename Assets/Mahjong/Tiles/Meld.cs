@@ -43,8 +43,8 @@ namespace Mahjong
     //Potential Melds are for hand strategy
     public class PotentialMeld : Meld
     {
-        private List<TileID> _waits = new List<TileID>();
-        public List<TileID> Waits
+        private List<Wait> _waits = new List<Wait>();
+        public List<Wait> Waits
         {
             get
             {
@@ -52,10 +52,17 @@ namespace Mahjong
             }
         }
         public bool Completed = false;
-        public int Fungibility = 1; //used by AI. Set to negative to lock (as in open meld)
+        public float Fungibility = 1f; //used by AI. Set to negative to lock (as in open meld)
         public float Value = 0f; //used by AI.
-        public bool Overlaps = false; //used by AI. true if the wait completes 2 or more melds, 
-                                      //or if the completed meld overlaps with another completed meld
+        public bool Overlaps = false; //used by AI.
+        public TileID.Suits Suit
+        {
+            get
+            {
+                if (IDs.Count == 0) return TileID.Suits.Man;
+                else return IDs[0].Suit;
+            }
+        }
 
         //Insert tile into sorted position
         public void Add(TileID tile)
@@ -72,6 +79,14 @@ namespace Mahjong
             _ids.Remove(tile);
         }
 
+        //Constructors
+        public PotentialMeld() { }
+        public PotentialMeld(List<TileID> list)
+        {
+            for (int i = 0; i < list.Count; i++)
+                Add(list[i].Copy());
+        }
+
         //Indexer
         public override TileID this[int index]
         {
@@ -85,6 +100,7 @@ namespace Mahjong
         //Comparison operators
         public static bool operator ==(PotentialMeld m1, PotentialMeld m2)
         {
+            if (m1.Type != m2.Type) return false;
             if (m1.Count != m2.Count) return false;
             for (int i = 0; i < m1.Count; i++)
                 if (m1[i] != m2[i]) return false;
@@ -107,8 +123,80 @@ namespace Mahjong
                 hash |= (((int)_ids[i].Suit)) << (i * 6);
                 hash |= (((int)_ids[i].Number - 1) << 3) << (i * 6);
             }
+            hash |= ((int)Type) << 24;
             return hash;
         }
+
+        /*
+        //Returns all possible completed versions
+        public List<PotentialMeld> GetCompleted()
+        {
+            List<PotentialMeld> list = new List<PotentialMeld>();
+            if (Completed) return list;
+            PotentialMeld meld;
+            for (int i = 0; i < Waits.Count; i++)
+            {
+                meld = new PotentialMeld(_ids);
+                meld.Type = Type;
+                meld.Add(Waits[i].tile);
+                meld.Completed = true;
+                list.Add(meld);
+            }
+            return list;
+        }
+        */
+
+        //For ToString()
+        public static string[] MeldTypeStrings = new string[11]
+        {
+            /*
+            "Anjun",
+            "Minjun",
+            "Ankou",
+            "Minkou",
+            "Ankan",
+            "Shouminkan",
+            "Daiminkan",
+            "Jantou",
+            "Koutsu",
+            "Kantsu",
+            "Shuntsu"
+            */
+             //TODO: this is for test showcasing only
+            "Concealed sequence",
+            "Open sequence",
+            "Concealed triplet",
+            "Open triplet",
+            "Concealed quad",
+            "Late quad",
+            "Open quad",
+            "Pair",
+            "Triplet",
+            "Quad",
+            "Sequence"
+        };
+        
+        //Outputs the potential meld to string
+        public override string ToString()
+        {
+            string r;
+            if (Completed) r = "Completed ";
+            else r = "Potential ";
+            r += MeldTypeStrings[(byte)Type];
+            r += " { ";
+            for (int i = 0; i < IDs.Count; i++)
+                r += IDs[i].ToShortString() + ", ";
+            r += "} ";
+            if (Waits.Count > 0)
+            {
+                r += WaitPrinter.WaitTypeString(Waits[0].type) + " on { ";
+                for (int i = 0; i < Waits.Count; i++)
+                    r += Waits[i].tile.ToShortString() + ", ";
+                r += "} ";
+            }
+            return r;
+        }
+
     }
 
     //Open melds involve a stolen discard
@@ -221,13 +309,14 @@ namespace Mahjong
         //Arranges an open meld within the transform of the container
         public static void ArrangeOpenMeldGroup(ref GameObject container, OpenMeld meld)
         {
+            Debug.Log("ArrangeOpenMeldGroup: arranging " + meld.ConvertToPotentialMeld());
             meld.PlayerNumber = meld.PlayerNumber;
             int i = 0;
-            List<TileRenderer> tr = new List<TileRenderer>(4);
+            List<TileRenderer> tr = new List<TileRenderer>();
             for (i = 0; i < meld.Count; i++)
             {
                 meld.Tiles[i].transform.parent = container.transform;
-                tr[i] = meld.Tiles[i].GetComponent<TileRenderer>();
+                tr.Add(meld.Tiles[i].Renderer);
             }
             TileRenderer low = null;
             TileRenderer mid = null;
@@ -277,7 +366,7 @@ namespace Mahjong
                     low.Orientation = TileOrientation.Bottom;
                     high.Orientation = TileOrientation.Bottom;
                     high.LowerRight = new Vector2(0.5f * meld.Width, 0f);
-                    low.LowerRight = high.LowerRight;
+                    low.LowerRight = high.LowerLeft;
                     stolen.LowerRight = low.LowerLeft;
                     break;
 
@@ -410,8 +499,6 @@ namespace Mahjong
                     break;
             }
         }
-
-
 
     }
 }

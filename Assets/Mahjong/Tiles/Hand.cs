@@ -90,14 +90,47 @@ namespace Mahjong
             EventManager.FlagEvent("Hand " + PlayerNumber + " Discard");
         }
 
-        //Forms the requested open meld
-        public void FormOpenMeld(Meld.MeldType type, List<Tile> withTiles, int accessKey = 0)
+        //Forms an open meld that matches the potential meld. Cannot be used for shouminkan.
+        public void FormOpenMeld(PotentialMeld meld, int accessKey = 0)
         {
             if ((accessKey != _accessKey) && _accessKey != 0)
                 return;
-            Tiles.OpenTiles(withTiles, _accessKey);
-            OpenMeld meld = new OpenMeld(type, withTiles, PlayerNumber);
-            OpenMelds.Add(meld);
+            TileID discardID = Kawa.MostRecentDiscard.Query();
+            List<Tile> with = new List<Tile>();
+            int start = 0;
+            Meld.MeldType type = Meld.MeldType.Minkou;
+            if (meld.Type == Meld.MeldType.Kantsu)
+            {
+                start = Tiles.IndexOf(discardID);
+                with.Add(Tiles[start]);
+                with.Add(Tiles[start + 1]);
+                with.Add(Tiles[start + 2]);
+                with.Add(Tiles[start + 3]);
+                if (meld.Completed) type = Meld.MeldType.Ankan;
+                else type = Meld.MeldType.Daiminkan;
+            }
+            else if (meld.Type == Meld.MeldType.Koutsu)
+            {
+                start = Tiles.IndexOf(discardID);
+                with.Add(Tiles[start]);
+                with.Add(Tiles[start + 1]);
+                with.Add(Tiles[start + 2]);
+                type = Meld.MeldType.Minkou;
+            }
+            else if (meld.Type == Meld.MeldType.Shuntsu)
+            {
+                //Use the self-sorting property of PotentialMeld to get the first ID
+                PotentialMeld completed = new PotentialMeld(meld.IDs);
+                completed.Add(discardID);
+                with.Add(Tiles[Tiles.IndexOf(completed.IDs[0])]);
+                with.Add(Tiles[Tiles.IndexOf(completed.IDs[1])]);
+                with.Add(Tiles[Tiles.IndexOf(completed.IDs[2])]);
+                type = Meld.MeldType.Minjun;
+            }
+            //All the tiles are found, now form the open meld
+            Tiles.OpenTiles(with, _accessKey);
+            OpenMeld open = new OpenMeld(type, with, PlayerNumber);
+            OpenMelds.Add(open);
             EventManager.FlagEvent("Hand " + PlayerNumber + " Open Meld");
         }
 

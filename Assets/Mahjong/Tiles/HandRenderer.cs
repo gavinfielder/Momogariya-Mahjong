@@ -12,6 +12,7 @@ namespace Mahjong
         #pragma warning disable CS0649
         public GameObject HandArea;
         public GameObject DrawArea;
+        public GameObject OpenMeldArea;
         public GameObject TileBase;
         #pragma warning restore CS0649
         private Hand hand;
@@ -83,27 +84,27 @@ namespace Mahjong
             {
                 case TileOrientation.Bottom:
                     container.transform.SetPositionAndRotation(
-                        new Vector3(position, 0f), 
+                        (new Vector3(-position, 0f) + OpenMeldArea.transform.position), 
                         Quaternion.AngleAxis(0f, Vector3.forward));
-                    DrawArea.transform.Translate(new Vector3(-latest.Width, 0f));
+                    DrawArea.transform.Translate(new Vector3(-latest.Width * Constants.DRAW_POSITION_ADJUST_MULT, 0f));
                     break;
                 case TileOrientation.Right:
                     container.transform.SetPositionAndRotation(
-                        new Vector3(0f, -position),
+                        (new Vector3(0f, -position) + OpenMeldArea.transform.position),
                         Quaternion.AngleAxis(90f, Vector3.forward));
-                    DrawArea.transform.Translate(new Vector3(0f, -latest.Width));
+                    DrawArea.transform.Translate(new Vector3(-latest.Width * Constants.DRAW_POSITION_ADJUST_MULT, 0f));
                     break;
                 case TileOrientation.Top:
                     container.transform.SetPositionAndRotation(
-                        new Vector3(-position, 0f),
+                        (new Vector3(position, 0f) + OpenMeldArea.transform.position),
                         Quaternion.AngleAxis(180f, Vector3.forward));
-                    DrawArea.transform.Translate(new Vector3(latest.Width, 0f));
+                    DrawArea.transform.Translate(new Vector3(-latest.Width * Constants.DRAW_POSITION_ADJUST_MULT, 0f));
                     break;
                 case TileOrientation.Left:
                     container.transform.SetPositionAndRotation(
-                        new Vector3(0f, position),
+                        (new Vector3(0f, position) + OpenMeldArea.transform.position),
                         Quaternion.AngleAxis(270f, Vector3.forward));
-                    DrawArea.transform.Translate(new Vector3(0f, latest.Width));
+                    DrawArea.transform.Translate(new Vector3(-latest.Width * Constants.DRAW_POSITION_ADJUST_MULT, 0f));
                     break;
                 case TileOrientation.Player:
                     //TODO: what to do about Player orientation?

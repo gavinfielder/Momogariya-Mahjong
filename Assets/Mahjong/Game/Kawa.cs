@@ -6,6 +6,7 @@ namespace Mahjong
     //This class represents the pond of one player
     public class Kawa : MonoBehaviour
     {
+        
         private List<GameObject> _tiles = new List<GameObject>();
         private List<TileID> _tileIDs = new List<TileID>();
         public List<GameObject> Tiles
@@ -20,6 +21,30 @@ namespace Mahjong
             get
             {
                 return _tileIDs;
+            }
+        }
+        private static Tile _mostRecentDiscard;
+        public static Tile MostRecentDiscard
+        {
+            get
+            {
+                return _mostRecentDiscard;
+            }
+            private set
+            {
+                _mostRecentDiscard = value;
+            }
+        }
+        private static Kawa _mostRecentKawa;
+        public static Kawa MostRecentKawa
+        {
+            get
+            {
+                return _mostRecentKawa;
+            }
+            set
+            {
+                _mostRecentKawa = value;
             }
         }
 
@@ -42,15 +67,18 @@ namespace Mahjong
             //Add to lists
             _tiles.Add(tileObj);
             _tileIDs.Add(tile.Query());
+            //Set as most recent discard and kawa
+            MostRecentDiscard = tile;
+            MostRecentKawa = this;
         }
 
         //Increases steal count and returns a reference to the last discarded tile
-        public GameObject Steal()
+        public Tile Steal()
         {
             if (_tiles.Count - numberStolen == 0) return null;
             numberStolen++;
             _tiles[_tiles.Count - 1].GetComponent<Tile>().StolenDiscard = true;
-            return _tiles[_tiles.Count - 1];
+            return _tiles[_tiles.Count - 1].GetComponent<Tile>();
         }
 
         //Gets the next position to place a tile in the pond
@@ -103,5 +131,7 @@ namespace Mahjong
             }
             return v;
         }
+
+        
     }
 }

@@ -124,6 +124,15 @@ namespace Mahjong
             return tile;
         }
 
+        //Returns true if two tiles are in the same suji
+        public static bool InSameSuji(TileID t1, TileID t2)
+        {
+            if (t1.Number == 0 || t2.Number == 0) return false;
+            if (t1.Suit != t2.Suit) return false;
+            if (Math.Abs(t1.Number - t2.Number) > 2) return false;
+            return true;
+        }
+
         //For ToString()
         private static string[] kazeStr = new string[4]
         {
@@ -132,11 +141,36 @@ namespace Mahjong
             "Shaa (west wind)",
             "Pei (north wind)"
         };
+        private static string[] kazeStr_short = new string[4]
+        {
+            /*
+            "Ton",
+            "Nan",
+            "Shaa",
+            "Pei"
+            */ //TODO: this is for test showcasing only
+            "East wind",
+            "South wind",
+            "West wind",
+            "North wind"
+        };
         private static string[] sangenStr = new string[3]
         {
             "Chun (red dragon)",
             "Haku (white dragon)",
             "Hatsu (green dragon)"
+        };
+        private static string[] sangenStr_short = new string[3]
+        {
+            /*
+            "Chun",
+            "Haku",
+            "Hatsu"
+            */
+            //TODO: this is for test showcasing only
+            "Red dragon",
+            "White dragon",
+            "Green dragon"
         };
         private static string[] numberStr = new string[9]
         {
@@ -177,5 +211,30 @@ namespace Mahjong
             return r;
         }
 
+        //Returns a shorter string version
+        public string ToShortString()
+        {
+            if (Number == 0) return "Invalid";
+            string r = "";
+            if (Suit == Suits.Kaze)
+            {
+                r = kazeStr_short[Number - 2];
+            }
+            else if (Suit == Suits.Sangen)
+            {
+                r = sangenStr_short[Number - 2];
+            }
+            else
+            {
+                r += Number;
+                if (Suit == Suits.Man)
+                    r += "-man";
+                else if (Suit == Suits.Pin)
+                    r += "-pin";
+                else if (Suit == Suits.Sou)
+                    r += "-sou";
+            }
+            return r;
+        }
     }
 }

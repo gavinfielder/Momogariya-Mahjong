@@ -13,14 +13,12 @@
     <TargetFrameworkIdentifier>.NETFramework</TargetFrameworkIdentifier>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <TargetFrameworkProfile>Unity Subset v3.5</TargetFrameworkProfile>
-    <CompilerResponseFile>
-    </CompilerResponseFile>
+    <CompilerResponseFile></CompilerResponseFile>
     <UnityProjectGenerator>VSTU</UnityProjectGenerator>
     <UnityProjectType>Game:1</UnityProjectType>
     <UnityBuildTarget>StandaloneWindows64:19</UnityBuildTarget>
     <UnityVersion>2017.2.0f3</UnityVersion>
-    <RootNamespace>
-    </RootNamespace>
+    <RootNamespace></RootNamespace>
     <LangVersion>4</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -230,8 +228,10 @@
     <Compile Include="Assets\Mahjong\Game\GameController.cs" />
     <Compile Include="Assets\Mahjong\Game\Kawa.cs" />
     <Compile Include="Assets\Mahjong\Game\RuleSet.cs" />
+    <Compile Include="Assets\Mahjong\Game\TurnArgs.cs" />
     <Compile Include="Assets\Mahjong\Game\WallManager.cs" />
     <Compile Include="Assets\Mahjong\Players\IPlayer.cs" />
+    <Compile Include="Assets\Mahjong\Players\NakiUIManager.cs" />
     <Compile Include="Assets\Mahjong\Players\Player.cs" />
     <Compile Include="Assets\Mahjong\Players\UserPlayer.cs" />
     <Compile Include="Assets\Mahjong\Tiles\Hand.cs" />
@@ -239,10 +239,12 @@
     <Compile Include="Assets\Mahjong\Tiles\HandRenderer.cs" />
     <Compile Include="Assets\Mahjong\Tiles\HandSortingMethod.cs" />
     <Compile Include="Assets\Mahjong\Tiles\Meld.cs" />
+    <Compile Include="Assets\Mahjong\Tiles\Naki.cs" />
     <Compile Include="Assets\Mahjong\Tiles\Tile.cs" />
     <Compile Include="Assets\Mahjong\Tiles\TileCollection.cs" />
     <Compile Include="Assets\Mahjong\Tiles\TileID.cs" />
     <Compile Include="Assets\Mahjong\Tiles\TileRenderer.cs" />
+    <Compile Include="Assets\Mahjong\Tiles\Wait.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="GenerateTargetFrameworkMonikerAttribute" />

@@ -9,10 +9,10 @@ namespace Mahjong
     public interface IPlayer
     {
         //Offers a discard to be called as naki
-        void Offer(TileID tile);
+        void Offer(Tile tile);
         //Starts the player's turn
         void StartTurn(TurnArgs args);
         //Sets up the player with a hand
-        void Setup(int playerNumber, ref Hand h, ref Kawa k, GameController control, ref GameBoard gameBoard);
+        void Setup(int playerNumber, Hand h, Kawa k, GameController control, GameBoard gameBoard);
     }
 }

@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Mahjong
 {
@@ -16,15 +18,20 @@ namespace Mahjong
         public string Bakaze { get { return Round.Substring(0, 5).Trim(' ', '-', ':'); } }
 
         //Game data
-        public Player[] Players = new Player[4];
+        public UserPlayer[] Players = new UserPlayer[4];
         public Player CurrentTurnPlayer { get; private set; }
         public GameBoard board;
+        public NakiUIManager NakiManager;
         private List<GameObject> allTiles = new List<GameObject>();
+        private List<Naki> nakiResponses = new List<Naki>();
+        private TurnArgs nextTurnArgs;
 
 
         //Object references
         #pragma warning disable CS0649
         public GameObject TileBase;
+        public Text DebugDisplayText;
+        public Canvas DebugDisplayCanvas;
         #pragma warning restore CS0649
 
         //***********************************************************************
@@ -39,6 +46,8 @@ namespace Mahjong
 
         private void Update()
         {
+            //Check user input
+            CheckHotkeys();
             //Process the current state
             ProcessState();
         }
@@ -51,7 +60,25 @@ namespace Mahjong
             //if (bakazeCheck != "east" && bakazeCheck != "south" && bakazeCheck != "west" && bakazeCheck != "north") return;
             
             Round = round;
+        }
 
+        //Checks all input for the globally available hotkeys
+        private void CheckHotkeys()
+        {
+            if (Input.GetKeyDown(KeyCode.F3))
+            {
+                DebugDisplayCanvas.gameObject.SetActive(!(DebugDisplayCanvas.gameObject.activeSelf));
+                DebugDisplayCanvas.gameObject.layer = 30;
+            }
+            if (Input.GetKeyDown(KeyCode.F12))
+            {
+                Debug.Log("GameController current state: " + State + "\r\n" +
+                    "Player 1 current state: " + Players[0].State + "\r\n" +
+                    "Player 2 current state: " + Players[1].State + "\r\n" +
+                    "Player 3 current state: " + Players[2].State + "\r\n" +
+                    "Player 4 current state: " + Players[3].State + "\r\n");
+
+            }
         }
 
 
@@ -181,6 +208,10 @@ namespace Mahjong
             stateProcesses.Add("Player 2 Turn", Process_Player2Turn);
             stateProcesses.Add("Player 3 Turn", Process_Player3Turn);
             stateProcesses.Add("Player 4 Turn", Process_Player4Turn);
+            stateProcesses.Add("Player 1 Offering Naki", Process_Player1OfferingNaki);
+            stateProcesses.Add("Player 2 Offering Naki", Process_Player2OfferingNaki);
+            stateProcesses.Add("Player 3 Offering Naki", Process_Player3OfferingNaki);
+            stateProcesses.Add("Player 4 Offering Naki", Process_Player4OfferingNaki);
             stateProcesses.Add("Awaiting Player Action", Process_Null);
         }
 
@@ -193,7 +224,7 @@ namespace Mahjong
             if (found)
             {
                 State = state;
-                Debug.Log("GameController new state: " + state);
+                //Debug.Log("GameController new state: " + state);
             }
             else
             {
@@ -208,6 +239,7 @@ namespace Mahjong
 
         private void Process_Null() { }
 
+        //HandAnalyzer Hal;
         private void Process_Test()
         {
             //Test script
@@ -242,15 +274,20 @@ namespace Mahjong
                 Players[3] = GameObject.Find("Player 4").GetComponent<UserPlayer>();
 
 
-                Players[0].Setup(1, ref hands[0], ref board.Ponds[0], this, ref board);
-                Players[1].Setup(2, ref hands[1], ref board.Ponds[1], this, ref board);
-                Players[2].Setup(3, ref hands[2], ref board.Ponds[2], this, ref board);
-                Players[3].Setup(4, ref hands[3], ref board.Ponds[3], this, ref board);
+                Players[0].Setup(1, hands[0], board.Ponds[0], this, board);
+                Players[1].Setup(2, hands[1], board.Ponds[1], this, board);
+                Players[2].Setup(3, hands[2], board.Ponds[2], this, board);
+                Players[3].Setup(4, hands[3], board.Ponds[3], this, board);
 
                 Players[0].enabled = true;
                 Players[1].enabled = true;
                 Players[2].enabled = true;
                 Players[3].enabled = true;
+
+                //Hal = new HandAnalyzer(hands[0], 0);
+                //EventManager.Subscribe("Debug: New HandAnalyzer Analysis Available",
+                    //() => { Debug.Log(Hal.Debug_Print()); });
+                    //() => { DebugDisplayText.text = Hal.Debug_Print(); });
 
                 for (int i = 0; i < 13; i++)
                 {
@@ -261,6 +298,8 @@ namespace Mahjong
                 }
                 EventManager.FlagEvent("Hands Dealt");
 
+
+                nextTurnArgs = TurnArgs.Default;
                 SetState("Player 1 Turn");
                 
 
@@ -279,131 +318,150 @@ namespace Mahjong
         //Player 1 Turn
         private void Process_Player1Turn()
         {
-            Players[0].StartTurn(TurnArgs.Default);
+            Players[0].StartTurn(nextTurnArgs);
             EventManager.Subscribe("Hand 1 Discard", OnPlayer1Discard);
             SetState("Awaiting Player Action");
         }
         private void OnPlayer1Discard()
         {
             EventManager.Unsubscribe("Hand 1 Discard", OnPlayer1Discard);
-            SetState("Player 2 Turn");
+            Players[1].Offer(Kawa.MostRecentDiscard);
+            Players[2].Offer(Kawa.MostRecentDiscard);
+            Players[3].Offer(Kawa.MostRecentDiscard);
+            SetState("Player 1 Offering Naki");
+        }
+        private void Process_Player1OfferingNaki()
+        {
+            if (nakiResponses.Count == 3)
+            {
+                //All naki responses received. 
+                ProcessNakiRequests("Player 2 Turn");
+            }
         }
 
         //Player 2 Turn
         private void Process_Player2Turn()
         {
-            Players[1].StartTurn(TurnArgs.Default);
+            Players[1].StartTurn(nextTurnArgs);
             EventManager.Subscribe("Hand 2 Discard", OnPlayer2Discard);
             SetState("Awaiting Player Action");
         }
         private void OnPlayer2Discard()
         {
             EventManager.Unsubscribe("Hand 2 Discard", OnPlayer2Discard);
-            SetState("Player 3 Turn");
+            Players[0].Offer(Kawa.MostRecentDiscard);
+            Players[2].Offer(Kawa.MostRecentDiscard);
+            Players[3].Offer(Kawa.MostRecentDiscard);
+            SetState("Player 2 Offering Naki");
+        }
+        private void Process_Player2OfferingNaki()
+        {
+            if (nakiResponses.Count == 3)
+            {
+                //All naki responses received. 
+                ProcessNakiRequests("Player 3 Turn");
+            }
         }
 
         //Player 3 Turn
         private void Process_Player3Turn()
         {
-            Players[2].StartTurn(TurnArgs.Default);
+            Players[2].StartTurn(nextTurnArgs);
             EventManager.Subscribe("Hand 3 Discard", OnPlayer3Discard);
             SetState("Awaiting Player Action");
         }
         private void OnPlayer3Discard()
         {
             EventManager.Unsubscribe("Hand 3 Discard", OnPlayer3Discard);
-            SetState("Player 4 Turn");
+            Players[0].Offer(Kawa.MostRecentDiscard);
+            Players[1].Offer(Kawa.MostRecentDiscard);
+            Players[3].Offer(Kawa.MostRecentDiscard);
+            SetState("Player 3 Offering Naki");
+        }
+        private void Process_Player3OfferingNaki()
+        {
+            if (nakiResponses.Count == 3)
+            {
+                //All naki responses received. 
+                ProcessNakiRequests("Player 4 Turn");
+            }
         }
 
         //Player 4 Turn
         private void Process_Player4Turn()
         {
-            Players[3].StartTurn(TurnArgs.Default);
+            Players[3].StartTurn(nextTurnArgs);
             EventManager.Subscribe("Hand 4 Discard", OnPlayer4Discard);
             SetState("Awaiting Player Action");
         }
         private void OnPlayer4Discard()
         {
             EventManager.Unsubscribe("Hand 4 Discard", OnPlayer4Discard);
-            SetState("Player 1 Turn");
+            Players[0].Offer(Kawa.MostRecentDiscard);
+            Players[1].Offer(Kawa.MostRecentDiscard);
+            Players[2].Offer(Kawa.MostRecentDiscard);
+            SetState("Player 4 Offering Naki");
         }
-
-
+        private void Process_Player4OfferingNaki()
+        {
+            if (nakiResponses.Count == 3)
+            {
+                //All naki responses received. 
+                ProcessNakiRequests("Player 1 Turn");
+            }
+        }
 
         //***********************************************************************
-        //***************************** Event Handlers **************************
+        //**************************** Naki Management **************************
         //***********************************************************************
 
-        public void OnPonButtonClick()
+        //Callback for players responding to naki offers
+        public void RespondToOffer(Naki naki)
         {
-            EventManager.FlagEvent("Pon Called");
-            Debug.Log("Pon Called");
-        }
-        public void OnChiiButtonClick()
-        {
-            EventManager.FlagEvent("Chii Called");
-            Debug.Log("Chii Called");
-        }
-        public void OnRonButtonClick()
-        {
-            EventManager.FlagEvent("Ron Called");
-            Debug.Log("Ron Called");
-        }
-        public void OnKanButtonClick()
-        {
-            EventManager.FlagEvent("Kan Called");
-            Debug.Log("Kan Called");
-        }
-        public void OnTsumoButtonClick()
-        {
-            EventManager.FlagEvent("Tsumo Called");
-            Debug.Log("Tsumo Called");
-        }
-        public void OnContinueButtonClick()
-        {
-            EventManager.FlagEvent("Continue Called");
-            Debug.Log("Continue Called");
+            nakiResponses.Add(naki);
         }
 
+        //Processes all naki requests and sets the next player turn accordingly
+        public void ProcessNakiRequests(string nextStateIfNashi)
+        {
+            //Debug.Log("Processing naki responses:\r\n" + nakiResponses[0] + "\r\n"
+                //+ nakiResponses[1] + "\r\n" + nakiResponses[2] + "\r\n");
+            Naki naki = new Naki() { type = NakiType.Nashi };
+            for (int i = 0; i < 3; i++)
+            {
+                if (nakiResponses[i].type > naki.type) //if higher priority
+                {
+                    if (nakiResponses[i].type == NakiType.Chii)
+                    {
+                        //Check if kamicha (player to right)
+                        if ((nakiResponses[i].requestor.PlayerNumber - Kawa.MostRecentKawa.PlayerNumber + 4) % 4 == 1)
+                        {
+                            naki = nakiResponses[i];
+                        }
+                    }
+                    else
+                    {
+                        naki = nakiResponses[i];
+                    }
+                }
+            }
+            if (naki.type == NakiType.Nashi)
+            {
+                nextTurnArgs = TurnArgs.Default;
+                SetState(nextStateIfNashi);
+            }
+            else
+            {
+                //Flow interrupt. Start the relevant player's turn instead
+                nextTurnArgs = new TurnArgs(Naki.GetTurnArgs(naki.type), naki);
+                SetState("Player " + naki.requestor.PlayerNumber + " Turn");
+            }
+            nakiResponses.Clear();
+        }
+        
 
     }
 
-
-
-
-
-    //Describes the result of a player's turn
-    public struct TurnResult
-    {
-        public TileID Discard { get; set; }
-    }
-
-    //Player turn arguments based on type of draw
-    public enum TurnArgs : byte
-    {
-        Default = 1,
-        Chii = 2,
-        Pon = 3,
-        Daiminkan = 4,
-        KanContinue = 5
-    }
-
-    //Types of Naki. Enumerated by priority low to high
-    public enum NakiType : byte
-    {
-        Nashi = 0,
-        Chii = 2,
-        Pon = 3,
-        Daiminkan = 4,
-        Ron = 6
-    }
-
-    //Describes a tile discard call request
-    public struct Naki
-    {
-        public NakiType Type;
-        public Player Requestor;
-    }
 
 
 }

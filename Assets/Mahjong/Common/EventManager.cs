@@ -74,7 +74,7 @@ namespace Mahjong
             if (Instance.events.TryGetValue(eventName, out thisEvent))
             {
                 thisEvent.Invoke();
-                Debug.Log("Event flagged: " + eventName);
+                //Debug.Log("Event flagged: " + eventName);
             }
             else
             {

@@ -22,7 +22,7 @@ namespace Mahjong
         public Player CurrentTurnPlayer { get; private set; }
         public GameBoard board;
         public NakiUIManager NakiManager;
-        private List<GameObject> allTiles = new List<GameObject>();
+        private UnsortedTileCollection allTiles = new UnsortedTileCollection();
         private List<Naki> nakiResponses = new List<Naki>();
         private TurnArgs nextTurnArgs;
 
@@ -174,7 +174,7 @@ namespace Mahjong
             Tile tile = tileObj.GetComponent<Tile>();
             tile.Set(suit, number, aka);
             tileObj.SetActive(true);
-            allTiles.Add(tileObj);
+            allTiles.Add(tile);
         }
 
         //Clears the tile collection
@@ -182,7 +182,7 @@ namespace Mahjong
         {
             while (allTiles.Count > 0)
             {
-                allTiles[0].SetActive(false);
+                allTiles[0].gameObject.SetActive(false);
                 allTiles.RemoveAt(0);
             }
         }
@@ -248,7 +248,7 @@ namespace Mahjong
 
                 Debug.Log("Executing test script...");
                 CreateTileSet(RuleSets.DefaultRules);
-                board.Wall.Build(ref allTiles);
+                board.Wall.Build(allTiles);
 
                 System.Random rand = new System.Random();
                 int r = rand.Next(1, 5);

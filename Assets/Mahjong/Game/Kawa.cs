@@ -6,47 +6,17 @@ namespace Mahjong
     //This class represents the pond of one player
     public class Kawa : MonoBehaviour
     {
-        
-        private List<GameObject> _tiles = new List<GameObject>();
-        private List<TileID> _tileIDs = new List<TileID>();
-        public List<GameObject> Tiles
+        private UnsortedTileCollection _tiles = new UnsortedTileCollection();
+        public UnsortedTileCollection Tiles
         {
             get
             {
                 return _tiles;
             }
         }
-        public List<TileID> TileIDs
-        {
-            get
-            {
-                return _tileIDs;
-            }
-        }
-        private static Tile _mostRecentDiscard;
-        public static Tile MostRecentDiscard
-        {
-            get
-            {
-                return _mostRecentDiscard;
-            }
-            private set
-            {
-                _mostRecentDiscard = value;
-            }
-        }
-        private static Kawa _mostRecentKawa;
-        public static Kawa MostRecentKawa
-        {
-            get
-            {
-                return _mostRecentKawa;
-            }
-            set
-            {
-                _mostRecentKawa = value;
-            }
-        }
+
+        public static Tile MostRecentDiscard { get; set; }
+        public static Kawa MostRecentKawa { get; set; }
 
         public TileOrientation Orientation;
         public GameObject Area;
@@ -56,18 +26,14 @@ namespace Mahjong
         
 
         //Adds a discarded tile to the pond
-        public void Add(GameObject tileObj)
+        public void Add(Tile tile)
         {
-            Tile tile = tileObj.GetComponent<Tile>();
-            TileRenderer tr = tileObj.GetComponent<TileRenderer>();
-            //Put in pond
-            tr.Position = GetNextPosition();
-            tr.Orientation = Orientation;
+            Tiles.Add(tile);
+            //Arrange in pond
+            tile.Renderer.Position = GetNextPosition();
+            tile.Renderer.Orientation = Orientation;
             tile.SetVisibility(TileVisibility.FaceUp);
-            //Add to lists
-            _tiles.Add(tileObj);
-            _tileIDs.Add(tile.Query());
-            //Set as most recent discard and kawa
+            //Set static information accessors
             MostRecentDiscard = tile;
             MostRecentKawa = this;
         }
@@ -75,10 +41,10 @@ namespace Mahjong
         //Increases steal count and returns a reference to the last discarded tile
         public Tile Steal()
         {
-            if (_tiles.Count - numberStolen == 0) return null;
+            if (Tiles.Count - numberStolen == 0) return null;
             numberStolen++;
-            _tiles[_tiles.Count - 1].GetComponent<Tile>().StolenDiscard = true;
-            return _tiles[_tiles.Count - 1].GetComponent<Tile>();
+            Tiles[Tiles.Count - 1].StolenDiscard = true;
+            return Tiles[Tiles.Count - 1];
         }
 
         //Gets the next position to place a tile in the pond

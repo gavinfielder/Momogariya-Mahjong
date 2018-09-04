@@ -15,7 +15,7 @@ namespace Mahjong
         private int accessKey = 0;
         private int PlayerNumber;
         private List<PotentialMeld> Melds = new List<PotentialMeld>();
-        private TileCollection LooseTiles = new TileCollection();
+        private SortedTileCollection LooseTiles = new SortedTileCollection();
 
         //Constructor
         public HandAnalyzer(Hand h, int handAccessKey)
@@ -72,7 +72,7 @@ namespace Mahjong
         {
             Melds.Clear();
             //All closed tiles are loose until proven otherwise
-            LooseTiles = new TileCollection(hand.Tiles.Closed.GetTileList(), accessKey);
+            LooseTiles = new SortedTileCollection(hand.Tiles.Closed.GetTileList(), accessKey);
             //Add all the open melds
             int i = 0;
             for (i = 0; i < hand.OpenMelds.Count; i++)

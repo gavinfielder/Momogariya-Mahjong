@@ -86,7 +86,7 @@ namespace Mahjong
             Discard = tile;
             tile.ReleaseOwnership(_accessKey);
             tile.StolenFrom = PlayerNumber;
-            kawa.Add(Discard.gameObject); //TODO: revisit when kawa is refactored to use Tile instead of GameObject
+            kawa.Add(Discard); //TODO: revisit when kawa is refactored to use Tile instead of GameObject
             EventManager.FlagEvent("Hand " + PlayerNumber + " Discard");
         }
 

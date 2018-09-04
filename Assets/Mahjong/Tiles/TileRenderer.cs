@@ -282,36 +282,31 @@ namespace Mahjong
         }
 
         //Gets or sets the tile that this renderer shows
-        private TileID face;
-        public TileID Face
+        private TileID _face;
+        private TileID Face
         {
-            get
-            {
-                return face.Copy();
-            }
-            private set
+            set
             {
                 if (value == TileID.Invalid) return;
                 if (value == TileID.Hidden)
                 {
                     BaseSpriteRenderer.sprite = Resources.Load<Sprite>("Tiles/TempDev/Back-Gold");
                     FaceSpriteRenderer.sprite = null;
-                    face = value;
+                    _face = value;
                 }
                 else if (value == TileID.HiddenHand)
                 {
                     BaseSpriteRenderer.sprite = Resources.Load<Sprite>("Tiles/TempDev/Top");
                     FaceSpriteRenderer.sprite = null;
-                    face = value;
+                    _face = value;
                 }
                 else
                 {
                     BaseSpriteRenderer.sprite = Resources.Load<Sprite>("Tiles/TempDev/Front");
                     FaceSpriteRenderer.sprite = Resources.Load<Sprite>(GetAssetPath(value));
-                    face = value.Copy();
+                    _face = value.Copy();
                 }
             }
-
         }
 
         //Sets the sorting orders in the sprite rendering layer

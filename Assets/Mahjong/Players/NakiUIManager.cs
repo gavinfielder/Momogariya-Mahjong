@@ -23,13 +23,14 @@ namespace Mahjong
         public delegate void NakiHandler(Naki naki);
         private bool busy = false;
         private NakiHandler callback;
-        private Player player;
+        //private Player player;
+        private int playerNum;
         private List<Naki> calls;
         private int accessKey; //Needed if the user needs to select a tile to clarify
         
 
         //Requests naki handling. Returns false if busy, true if request accepted
-        public bool RequestService(List<Naki> naki, NakiHandler cb, int handAccessKey)
+        public bool RequestService(List<Naki> naki, NakiHandler cb, int playerNumber, int handAccessKey)
         {
             if (busy) return false;
             if (naki == null || naki.Count == 0)
@@ -41,7 +42,8 @@ namespace Mahjong
             //Set up the call canvas to handle the request
             callback = cb;
             calls = naki;
-            player = naki[0].requestor;
+            //player = naki[0].requestor;
+            playerNum = playerNumber;
             handAccessKey = accessKey;
             CallCanvas.gameObject.SetActive(true);
             SetOptions();
@@ -50,9 +52,9 @@ namespace Mahjong
         }
 
         //Sets the options
-        public void SetOptions()
+        private void SetOptions()
         {
-            Header.text = "Player " + player.PlayerNumber;
+            Header.text = "Player " + playerNum;
             if (ContainsType(NakiType.Chii)) ChiiButton.gameObject.SetActive(true);
             if (ContainsType(NakiType.Pon)) PonButton.gameObject.SetActive(true);
             if (ContainsType(NakiType.Ron)) RonButton.gameObject.SetActive(true);
@@ -112,7 +114,7 @@ namespace Mahjong
             Naki naki = new Naki()
             {
                 type = NakiType.Nashi,
-                requestor = player,
+                //requestor = player,
                 meld = null
             };
             callback(naki);
@@ -132,7 +134,7 @@ namespace Mahjong
             int i = 0;
             while (i < calls.Count && calls[i].type != type)
                 i++;
-            if (i == calls.Count) return new Naki() { type = NakiType.Nashi, requestor = player };
+            if (i == calls.Count) return new Naki() { type = NakiType.Nashi/*, requestor = player*/ };
             else return calls[i];
         }
 
@@ -148,7 +150,7 @@ namespace Mahjong
 
 
         //Shuts down the service
-        public void FinalizeService()
+        private void FinalizeService()
         {
             PonButton.gameObject.SetActive(false);
             ChiiButton.gameObject.SetActive(false);
@@ -158,7 +160,7 @@ namespace Mahjong
             ContinueButton.gameObject.SetActive(false);
             CallCanvas.gameObject.SetActive(false);
             callback = null;
-            player = null;
+            //player = null;
             calls = null;
             busy = false;
         }

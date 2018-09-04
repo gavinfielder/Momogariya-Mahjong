@@ -10,7 +10,7 @@ namespace Mahjong
         InHand
     }
 
-    public class Tile : MonoBehaviour
+    public class Tile : MonoBehaviour, ISecured
     {
         private TileID id;
         private bool set = false;

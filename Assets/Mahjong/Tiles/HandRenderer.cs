@@ -16,7 +16,6 @@ namespace Mahjong
         public GameObject TileBase;
         #pragma warning restore CS0649
         private Hand hand;
-        public HandSortingMethod SortingMethod { private get; set; }
         private int _playerNumber = -1;
         public int PlayerNumber {
             get
@@ -48,7 +47,7 @@ namespace Mahjong
         public void UpdateOrientation(Tile tile)
         {
             tile.Renderer.Orientation = Orientation;
-            //The following Visible line only works if the Tile's access key is the public read key
+            //The following Visible line only works if the Tile's access key is the no owner key
             if (Visible) tile.SetVisibility(TileVisibility.FaceUp);
             else tile.SetVisibility(TileVisibility.InHand);
         }

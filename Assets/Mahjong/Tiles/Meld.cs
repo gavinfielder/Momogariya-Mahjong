@@ -127,25 +127,6 @@ namespace Mahjong
             return hash;
         }
 
-        /*
-        //Returns all possible completed versions
-        public List<PotentialMeld> GetCompleted()
-        {
-            List<PotentialMeld> list = new List<PotentialMeld>();
-            if (Completed) return list;
-            PotentialMeld meld;
-            for (int i = 0; i < Waits.Count; i++)
-            {
-                meld = new PotentialMeld(_ids);
-                meld.Type = Type;
-                meld.Add(Waits[i].tile);
-                meld.Completed = true;
-                list.Add(meld);
-            }
-            return list;
-        }
-        */
-
         //For ToString()
         public static string[] MeldTypeStrings = new string[11]
         {
@@ -203,8 +184,8 @@ namespace Mahjong
     public class OpenMeld : Meld
     {
 
-        private TileCollection _tiles = new TileCollection();
-        public TileCollection Tiles
+        private SortedTileCollection _tiles = new SortedTileCollection();
+        public SortedTileCollection Tiles
         {
             get
             {
@@ -267,7 +248,7 @@ namespace Mahjong
         public OpenMeld(MeldType type, List<Tile> tiles, int playerNumber)
         {
             Type = type;
-            _tiles = new TileCollection(tiles);
+            _tiles = new SortedTileCollection(tiles);
             PlayerNumber = playerNumber;
             for (int i = 0; i < Tiles.Count; i++)
                 Tiles[i].InOpenMeld = true;

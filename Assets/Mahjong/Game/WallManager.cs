@@ -1,14 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
-using UnityEngine.Events;
 using UnityEngine;
 
 namespace Mahjong
 {
-    public class WallManager : MonoBehaviour
+    public class WallManager : MonoBehaviour, ISecured
     {
 
-        private List<GameObject> wallTiles = new List<GameObject>();
+        private int _accessKey;
+        private UnsortedTileCollection _tiles = new UnsortedTileCollection();
+        public UnsortedTileCollection Tiles
+        {
+            get
+            {
+                return _tiles;
+            }
+            private set
+            {
+                _tiles = Tiles;
+            }
+        }
 
         private int kanReplacementDraws = 0;
         private int numberOfRegularDoras = 0;
@@ -29,11 +40,9 @@ namespace Mahjong
         {
             get
             {
-                return wallTiles.Count - 14;
+                return Tiles.Count - 14 - kanReplacementDraws;
             }
         }
-
-        private int accessKey = 0;
 
         private List<TileID> doras = new List<TileID>();
         public List<TileID> Doras
@@ -44,12 +53,16 @@ namespace Mahjong
             }
         }
 
+
+        //***********************************************************************
+        //******************************** Setup ********************************
+        //***********************************************************************
+
         //Builds the wall for a new game
-        public void Build(ref List<GameObject> allTiles)
+        public void Build(UnsortedTileCollection tiles, int accessKey = 0)
         {
-            //Initialize access key
-            if (accessKey == 0) accessKey = Security.AccessKeyHash(
-                Security.GetRandomAccessKey());
+            if ((accessKey != _accessKey) && _accessKey != 0)
+                return;
 
             //Reset status conditions
             doras.Clear();
@@ -57,18 +70,16 @@ namespace Mahjong
             numberOfRegularDoras = 0;
 
             //Reset tiles and wall
-            Tile tile;
-            wallTiles.Clear();
-            for (int i = 0; i < allTiles.Count; i++)
+            Tiles = tiles;
+            Tiles.SetOwner(_accessKey);
+            for (int i = 0; i < Tiles.Count; i++)
             {
-                tile = allTiles[i].GetComponent<Tile>();
-                tile.SetOwner(accessKey);
-                tile.SetVisibility(TileVisibility.FaceDown, accessKey);
-                wallTiles.Add(allTiles[i]);
+                Tiles[i].SetOwner(_accessKey);
+                Tiles[i].SetVisibility(TileVisibility.FaceDown, _accessKey);
             }
 
             //Shuffle
-            ShuffleRange(0, wallTiles.Count - 1);
+            ShuffleRange(0, Tiles.Count - 1);
 
             //Arrange wall
             ArrangeWall();
@@ -78,14 +89,10 @@ namespace Mahjong
         }
 
         //Builds a wall while forcing the first N draws and dora/kandora. For testing only.
-        public void Build_ForceOrder(ref List<GameObject> allTiles, List<TileID> firstDraws, List<TileID> firstDoras)
+        public void Build_ForceOrder(UnsortedTileCollection tiles, List<TileID> firstDraws, List<TileID> firstDoras, int accessKey = 0)
         {
-            EventManager.FlagEvent("Debug Function Invoked");
-            Debug.Log("Forcing wall build order...");
-
-            //Initialize access key
-            if (accessKey == 0) accessKey = Security.AccessKeyHash(
-                Security.GetRandomAccessKey());
+            if ((accessKey != _accessKey) && _accessKey != 0)
+                return;
 
             //Reset status conditions
             doras.Clear();
@@ -93,36 +100,37 @@ namespace Mahjong
             numberOfRegularDoras = 0;
 
             //Reset tiles and wall
-            Tile tile;
-            wallTiles.Clear();
-            for (int i = 0; i < allTiles.Count; i++)
+            Tiles = tiles;
+            Tiles.SetOwner(_accessKey);
+            for (int i = 0; i < Tiles.Count; i++)
             {
-                tile = allTiles[i].GetComponent<Tile>();
-                tile.SetOwner(accessKey);
-                tile.SetVisibility(TileVisibility.FaceDown, accessKey);
-                wallTiles.Add(allTiles[i]);
+                Tiles[i].SetOwner(_accessKey);
+                Tiles[i].SetVisibility(TileVisibility.FaceDown, _accessKey);
             }
-            
+
             //Set first draws
             for (int i = 0; i < firstDraws.Count; i++)
             {
-                ForceTileAt(firstDraws[i], i, i + 1, wallTiles.Count - 1);
+                ForceTileAt(firstDraws[i], i, i + 1, Tiles.Count - 1);
             }
             //Set first doras
             for (int i = 0; i < firstDoras.Count; i++)
             {
-                ForceTileAt(firstDoras[i], wallTiles.Count - 1 - i, firstDraws.Count, wallTiles.Count - 1 - i - 1);
+                ForceTileAt(firstDoras[i], Tiles.Count - 1 - i, firstDraws.Count, Tiles.Count - 1 - i - 1);
             }
 
             //Shuffle
-            ShuffleRange(firstDraws.Count, wallTiles.Count - 1 - firstDoras.Count);
+            ShuffleRange(firstDraws.Count, Tiles.Count - 1 - firstDoras.Count);
             //Done
             EventManager.FlagEvent("Wall Built");
         }
 
         //Breaks the wall and reveals the first dora
-        public void Break(int wallNumber)
+        public void Break(int wallNumber, int accessKey = 0)
         {
+            if ((accessKey != _accessKey) && _accessKey != 0)
+                return;
+
             //Align draw position (zero-index) accordingly
             int[] rotateBy = { 6, 40, 74, 108 };
             RotateWallTiles(rotateBy[wallNumber - 1]);
@@ -134,15 +142,19 @@ namespace Mahjong
             NewDora();
         }
 
+        //***********************************************************************
+        //******************************* Gameplay ******************************
+        //***********************************************************************
+
+
         //Draws a single tile from the wall
         public Tile Draw()
         {
             if (NumberDrawsRemaining == 0) return null;
-            GameObject tile = wallTiles[0];
-            wallTiles.RemoveAt(0);
-            tile.GetComponent<Tile>().ReleaseOwnership(accessKey);
-            //EventManager.FlagEvent("Normal Draw");
-            return tile.GetComponent<Tile>();
+            Tile tile = Tiles[0];
+            Tiles.RemoveAt(0);
+            tile.ReleaseOwnership(_accessKey);
+            return tile;
         }
 
         //Draws a kan replacement tile from the dead wall
@@ -155,8 +167,9 @@ namespace Mahjong
         //Flips a new dora. 
         public TileID NewDora()
         {
-            Tile indicator = wallTiles[wallTiles.Count - numberOfRegularDoras * 2 - 2].GetComponent<Tile>();
-            indicator.SetVisibility(TileVisibility.FaceUp, accessKey);
+            Tile indicator = Tiles[Tiles.Count - numberOfRegularDoras * 2 - 2];
+            indicator.ReleaseOwnership(_accessKey);
+            indicator.SetVisibility(TileVisibility.FaceUp);
             doras.Add(indicator.Query().GetDoraFromIndicator());
             numberOfRegularDoras++;
             EventManager.FlagEvent("New Dora");
@@ -172,26 +185,40 @@ namespace Mahjong
             return r;
         }
 
+        //***********************************************************************
+        //******************************* Shuffling *****************************
+        //***********************************************************************
+
         //Shuffles the tile at the specified index into a random location over a range
         private void ShuffleTile(int index, int low, int high)
         {
-            GameObject placeholder = new GameObject();
-            GameObject shuffling = wallTiles[index];
+            Tile placeholder = new Tile();
+            placeholder.SetOwner(_accessKey);
+            placeholder.Set(TileID.Suits.Kaze, 0);
+
+            Tile shuffling = Tiles[index];
             //Use placeholder to not mess up the range
-            wallTiles[index] = placeholder;
+            Tiles[index] = placeholder;
             System.Random rnd = new System.Random();
             int to = rnd.Next(low, high);
-            wallTiles.Insert(to, shuffling);
-            wallTiles.Remove(placeholder);
+            Tiles.Insert(to, shuffling, _accessKey);
+            Tiles.Remove(placeholder, _accessKey);
         }
         
         //Shuffles all the tiles over the specified range
         private void ShuffleRange(int low, int high)
         {
-            int shuffles = (high - low + 1) * 37;
             System.Random rnd = new System.Random();
-            int i, j;
-            for (int n = 0; n < shuffles; n++)
+            int i, j, n;
+            //Shuffle each tile sequentially
+            for (n = low; n <= high; n++)
+            {
+                j = rnd.Next(low, high + 1);
+                Swap2(n, j);
+            }
+            int shuffles = (high - low + 1) * 37;
+            //Do random shuffles
+            for (n = 0; n < shuffles; n++)
             {
                 i = rnd.Next(low, high + 1);
                 j = rnd.Next(low, high + 1);
@@ -203,19 +230,31 @@ namespace Mahjong
         private void Swap2(int i, int j)
         {
             if (i == j) return;
-            GameObject temp = wallTiles[i];
-            wallTiles[i] = wallTiles[j];
-            wallTiles[j] = temp;
+
+            Tile placeholder = new Tile();
+            placeholder.SetOwner(_accessKey);
+            placeholder.Set(TileID.Suits.Kaze, 0);
+
+            Tile wasi = Tiles[i];
+            Tile wasj = Tiles[j];
+
+            Tiles[j] = placeholder;
+            Tiles[i] = wasj;
+            Tiles[j] = wasi;
         }
 
         //Forces a tile at the specified index, shuffling into the given range until achieved
-        private void ForceTileAt(TileID tile, int index, int low, int high)
+        private void ForceTileAt(TileID id, int index, int low, int high)
         {
-            while (wallTiles[index].GetComponent<Tile>().Query(accessKey) != tile)
+            while (Tiles[index].Query(_accessKey) != id)
             {
                 ShuffleTile(index, low, high);
             }
         }
+
+        //***********************************************************************
+        //****************************** Arrangement ****************************
+        //***********************************************************************
 
         //Puts all the tiles in their proper spot.
         private void ArrangeWall()
@@ -246,14 +285,14 @@ namespace Mahjong
             for (int i = -8; i <= 8; i++)
             {
                 //tile on top
-                tr = wallTiles[j].GetComponent<TileRenderer>();
+                tr = Tiles[j].Renderer;
                 tr.Layer = 2;
                 tr.Position = FormWallOffset(x, y + Constants.TILE_HEIGHT, i, TileOrientation.Bottom);
                 tr.Orientation = TileOrientation.Bottom;
                 j++;
 
                 //tile on bottom
-                tr = wallTiles[j].GetComponent<TileRenderer>();
+                tr = Tiles[j].Renderer;
                 tr.Layer = 1;
                 tr.Position = FormWallOffset(x, y, i, TileOrientation.Bottom);
                 tr.Orientation = TileOrientation.Bottom;
@@ -267,14 +306,14 @@ namespace Mahjong
             for (int i = -8; i <= 8; i++)
             {
                 //tile on top
-                tr = wallTiles[j].GetComponent<TileRenderer>();
+                tr = Tiles[j].Renderer;
                 tr.Layer = 2;
                 tr.Position = FormWallOffset(x, y + Constants.TILE_HEIGHT, i, TileOrientation.Left);
                 tr.Orientation = TileOrientation.Left;
                 j++;
 
                 //tile on bottom
-                tr = wallTiles[j].GetComponent<TileRenderer>();
+                tr = Tiles[j].Renderer;
                 tr.Layer = 1;
                 tr.Position = FormWallOffset(x, y, i, TileOrientation.Left);
                 tr.Orientation = TileOrientation.Left;
@@ -288,14 +327,14 @@ namespace Mahjong
             for (int i = -8; i <= 8; i++)
             {
                 //tile on top
-                tr = wallTiles[j].GetComponent<TileRenderer>();
+                tr = Tiles[j].Renderer;
                 tr.Layer = 2;
                 tr.Position = FormWallOffset(x, y + Constants.TILE_HEIGHT, i, TileOrientation.Top);
                 tr.Orientation = TileOrientation.Top;
                 j++;
 
                 //tile on bottom
-                tr = wallTiles[j].GetComponent<TileRenderer>();
+                tr = Tiles[j].Renderer;
                 tr.Layer = 1;
                 tr.Position = FormWallOffset(x, y, i, TileOrientation.Top);
                 tr.Orientation = TileOrientation.Top;
@@ -309,14 +348,14 @@ namespace Mahjong
             for (int i = -8; i <= 8; i++)
             {
                 //tile on top
-                tr = wallTiles[j].GetComponent<TileRenderer>();
+                tr = Tiles[j].Renderer;
                 tr.Layer = 2;
                 tr.Position = FormWallOffset(x, y + Constants.TILE_HEIGHT, i, TileOrientation.Right);
                 tr.Orientation = TileOrientation.Right;
                 j++;
 
                 //tile on bottom
-                tr = wallTiles[j].GetComponent<TileRenderer>();
+                tr = Tiles[j].Renderer;
                 tr.Layer = 1;
                 tr.Position = FormWallOffset(x, y, i, TileOrientation.Right);
                 tr.Orientation = TileOrientation.Right;
@@ -349,7 +388,6 @@ namespace Mahjong
             return v;
         }
 
-
         //Arranges the wall broken
         private void ArrangeBreakWall(int wallNumber)
         {
@@ -358,20 +396,20 @@ namespace Mahjong
             float x, y;
 
             //Move last 6 of dead wall to the center
-            int i = wallTiles.Count - 1;
+            int i = Tiles.Count - 1;
             area = GameObject.Find("Dora Area");
             x = area.transform.position.x;
             y = area.transform.position.y;
             for (int j = 1; j >= -1; j--)
             {
                 //Bottom layer
-                tr = wallTiles[i].GetComponent<TileRenderer>();
+                tr = Tiles[i].Renderer;
                 tr.Position = new Vector2(x + j * Constants.ADJ_TILE_SPACING, y);
                 tr.Orientation = TileOrientation.Bottom;
                 i--;
 
                 //Top Layer
-                tr = wallTiles[i].GetComponent<TileRenderer>();
+                tr = Tiles[i].Renderer;
                 tr.Position = new Vector2(x + j * Constants.ADJ_TILE_SPACING, y + Constants.TILE_HEIGHT);
                 tr.Orientation = TileOrientation.Bottom;
                 i--;
@@ -384,13 +422,13 @@ namespace Mahjong
             for (int j = 1; j >= -2; j--)
             {
                 //Bottom layer
-                tr = wallTiles[i].GetComponent<TileRenderer>();
+                tr = Tiles[i].Renderer;
                 tr.Position = new Vector2(x + j * Constants.ADJ_TILE_SPACING, y);
                 tr.Orientation = TileOrientation.Bottom;
                 i--;
 
                 //Top layer
-                tr = wallTiles[i].GetComponent<TileRenderer>();
+                tr = Tiles[i].Renderer;
                 tr.Position = new Vector2(x + j * Constants.ADJ_TILE_SPACING, y + Constants.TILE_HEIGHT);
                 tr.Orientation = TileOrientation.Bottom;
                 i--;
@@ -401,37 +439,44 @@ namespace Mahjong
         //Helper function used to align the current draw with the front of the list
         private void RotateWallTiles(int n)
         {
-            GameObject temp;
+            Tile temp;
             for (int i = 0; i < n; i++)
             {
-                temp = wallTiles[0];
-                wallTiles.RemoveAt(0);
-                wallTiles.Add(temp);
+                temp = Tiles[0];
+                Tiles.RemoveAt(0);
+                Tiles.Add(temp);
             }
         }
 
-        //Clears all the rendered tiles of the wall
-        private void ClearWall()
+
+        //***********************************************************************
+        //************************** Access Management **************************
+        //***********************************************************************
+
+        //Sets the access key. Only works if no owner (current key is zero)
+        public void SetOwner(int newAccessKey)
         {
-            for (int i = 0; i < wallTiles.Count; i++)
+            if (_accessKey == 0) {
+                _accessKey = newAccessKey;
+                Tiles.SetOwner(_accessKey);
+            }
+            else
             {
-                wallTiles[i].SetActive(false);
-                wallTiles[i] = null;
+                Tiles.ReleaseOwnership(_accessKey);
+                _accessKey = newAccessKey;
+                Tiles.SetOwner(_accessKey);
             }
-            wallTiles.Clear();
         }
 
-        //Occurs when a tile is drawn from the wall
-        private void OnNormalDraw()
+        //Resets the access key to no owner (0)
+        public void ReleaseOwnership(int accessKey)
         {
-            wallTiles[0].SetActive(false);
-            wallTiles.RemoveAt(0);
+            if (accessKey == _accessKey)
+            {
+                _accessKey = 0;
+                Tiles.ReleaseOwnership(_accessKey);
+            }
         }
-
-
-
-
-
-
+        
     }
 }

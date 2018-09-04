@@ -208,7 +208,7 @@ namespace Mahjong
         }
         protected void Process_AwaitingUserNakiChoice()
         {
-            bool requestAccepted = controller.NakiManager.RequestService(sendingToUI, controller.RespondToOffer, accessKey);
+            bool requestAccepted = controller.NakiManager.RequestService(sendingToUI,  controller.RespondToOffer, PlayerNumber, accessKey);
             if (requestAccepted)
             {
                 SetState("Awaiting Turn");
